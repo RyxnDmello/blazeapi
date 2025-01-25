@@ -5,24 +5,36 @@ import (
 	"github.com/rivo/tview"
 )
 
-func QueryInput(handleAccept func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.InputField {
-	query := tview.
+func RequestInput(handleAccept func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.InputField {
+	input := tview.
 		NewInputField().
 		SetPlaceholder("Enter URL").
 		SetFieldBackgroundColor(tcell.ColorBlack).
 		SetPlaceholderStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).
 		SetAcceptanceFunc(handleAccept)
 
-	query.
+	input.
 		SetBorder(true).
 		SetBorderPadding(0, 0, 1, 1).
 		SetBackgroundColor(tcell.ColorBlack).
 		SetInputCapture(handleInput)
 
-	return query
+	return input
 }
 
-func RequestDropdown(requests []string, handleSelect func(text string, index int), handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.DropDown {
+func RequestBody() *tview.TextArea {
+	body := tview.
+		NewTextArea()
+
+	body.
+		SetBorder(true).
+		SetTitle(" {} Editor ").
+		SetTitleAlign(tview.AlignLeft)
+
+	return body
+}
+
+func MethodDropdown(requests []string, handleSelect func(text string, index int), handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.DropDown {
 	request := tview.
 		NewDropDown().
 		SetCurrentOption(0).
@@ -41,13 +53,13 @@ func RequestDropdown(requests []string, handleSelect func(text string, index int
 	return request
 }
 
-func CreateButton(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.Button {
+func CreateButton(handleSelect func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.Button {
 	create := tview.
 		NewButton("Connect").
 		SetLabelColor(tcell.ColorBlue).
 		SetStyle(tcell.StyleDefault.Background(tcell.ColorBlack).Bold(true)).
 		SetActivatedStyle(tcell.StyleDefault.Background(tcell.ColorBlack).Bold(true)).
-		SetSelectedFunc(handleClick)
+		SetSelectedFunc(handleSelect)
 
 	create.
 		SetBorder(true).
