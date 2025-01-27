@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"blazeapi/controls"
+	CONTROLS "blazeapi/controls"
+	PROJECT "blazeapi/project"
 	QUERY "blazeapi/query"
+	RESPONSE "blazeapi/response"
 
 	"github.com/rivo/tview"
 )
@@ -14,27 +16,23 @@ var (
 )
 
 func Blaze(app *tview.Application) *tview.Pages {
-	project = tview.NewTreeView()
-	project.SetBorder(true)
+	project := PROJECT.InitializeProject()
+	response, responseLayout := RESPONSE.InitializeResponse()
+	queryLayout, queryBodyModal := QUERY.InitializeQuery(app, response)
 
-	response = tview.NewTextView()
-	response.SetBorder(true)
-
-	query, queryBody := QUERY.InitializeQuery(app, response)
-
-	grid := tview.
+	main := tview.
 		NewGrid().
 		SetRows(3, 0).
-		AddItem(query, 0, 0, 1, 2, 0, 0, true).
-		AddItem(project, 1, 0, 1, 1, 0, 0, false).
-		AddItem(response, 1, 1, 1, 1, 0, 0, false)
+		AddItem(queryLayout, 0, 0, 1, 2, 0, 0, false).
+		AddItem(project, 1, 0, 1, 1, 0, 0, true).
+		AddItem(responseLayout, 1, 1, 1, 1, 0, 0, false)
 
 	pages := tview.
 		NewPages().
-		AddPage("QUERY_BODY_MODAL", queryBody, true, false).
-		AddPage("MAIN", grid, true, true)
+		AddPage("QUERY_BODY_MODAL", queryBodyModal, true, false).
+		AddPage("MAIN", main, true, true)
 
-	controls.Controls(app, pages, query)
+	CONTROLS.Controls(app, queryLayout, pages, project, responseLayout)
 
 	return pages
 }

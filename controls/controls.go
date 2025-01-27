@@ -5,20 +5,34 @@ import (
 	"github.com/rivo/tview"
 )
 
-func Controls(app *tview.Application, pages *tview.Pages, query *tview.Flex) {
+func Controls(app *tview.Application, query *tview.Flex, pages *tview.Pages, project *tview.TreeView, response *tview.Flex) {
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
+		case tcell.KeyCtrlQ:
+			CloseQueryBody(pages)
+			app.SetFocus(query)
+
+		case tcell.KeyCtrlP:
+			CloseQueryBody(pages)
+			app.SetFocus(project)
+
+		case tcell.KeyCtrlR:
+			CloseQueryBody(pages)
+			app.SetFocus(response)
+
 		case tcell.KeyCtrlB:
 			if query.HasFocus() {
-				pages.SendToFront("QUERY_BODY_MODAL").ShowPage("QUERY_BODY_MODAL")
+				ShowQueryBody(pages)
 				break
 			}
 
-			pages.SendToFront("MAIN").HidePage("QUERY_BODY_MODAL")
+			ShowQuery(app, pages, query)
 
 		case tcell.KeyEsc:
-			if name, _ := pages.GetFrontPage(); name == "QUERY_BODY_MODAL" {
-				pages.SendToBack("QUERY_BODY_MODAL").HidePage("QUERY_BODY_MODAL")
+			name, _ := pages.GetFrontPage()
+
+			if name == "QUERY_BODY_MODAL" {
+				ShowQuery(app, pages, query)
 				break
 			}
 		}
