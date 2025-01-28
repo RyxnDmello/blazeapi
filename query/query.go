@@ -81,8 +81,8 @@ func InitializeQuery(app *tview.Application, response *tview.TextView) (*tview.F
 
 	flex := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(requestMethod, 0, 1, true).
-		AddItem(requestQuery, 0, 5, false).
+		AddItem(requestMethod, 0, 1, false).
+		AddItem(requestQuery, 0, 5, true).
 		AddItem(requestButton, 0, 1, false)
 
 	return flex, requestBodyModal

@@ -5,24 +5,32 @@ import (
 	"github.com/rivo/tview"
 )
 
-func InitializeResponse() (*tview.TextView, *tview.Flex) {
-	response := tview.
-		NewTextView()
+func InitializeResponse(app *tview.Application) (*tview.TextView, *tview.Flex) {
+	var responseBody *tview.TextView
+	var clearButton *tview.Button
 
-	response.
-		SetBorder(true).
-		SetTitle(" 󰅪 Response ").
-		SetTitleAlign(tview.AlignLeft)
+	responseBody = ResponseBody(
+		func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Key() == tcell.KeyTAB {
+				app.SetFocus(clearButton)
+			}
 
-	clearButton := tview.
-		NewButton("Clear").
-		SetStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).
-		SetDisabledStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).
-		SetActivatedStyle(tcell.StyleDefault.Background(tcell.ColorBlack))
+			return event
+		},
+	)
 
-	clearButton.
-		SetBorder(true).
-		SetBackgroundColor(tcell.ColorNone)
+	clearButton = ClearButton(
+		func() {
+			responseBody.Clear()
+		},
+		func(event *tcell.EventKey) *tcell.EventKey {
+			if event.Key() == tcell.KeyTAB {
+				app.SetFocus(responseBody)
+			}
+
+			return event
+		},
+	)
 
 	tabsLayout := tview.
 		NewFlex().
@@ -34,8 +42,8 @@ func InitializeResponse() (*tview.TextView, *tview.Flex) {
 	responseLayout := tview.
 		NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(response, 0, 1, true).
+		AddItem(responseBody, 0, 1, true).
 		AddItem(tabsLayout, 3, 1, true)
 
-	return response, responseLayout
+	return responseBody, responseLayout
 }

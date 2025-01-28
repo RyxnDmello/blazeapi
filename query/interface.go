@@ -5,7 +5,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func RequestInput(handleAccept func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.InputField {
+func RequestInput(handleAccept func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) (requestInput *tview.InputField) {
 	input := tview.
 		NewInputField().
 		SetPlaceholder("Enter URL").
@@ -22,20 +22,20 @@ func RequestInput(handleAccept func(textToCheck string, lastChar rune) bool, han
 	return input
 }
 
-func RequestBody() *tview.TextArea {
-	body := tview.
+func RequestBody() (requestBody *tview.TextArea) {
+	textArea := tview.
 		NewTextArea()
 
-	body.
+	textArea.
 		SetBorder(true).
 		SetTitle(" {} Editor ").
 		SetTitleAlign(tview.AlignLeft)
 
-	return body
+	return textArea
 }
 
-func MethodDropdown(requests []string, handleSelect func(text string, index int), handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.DropDown {
-	request := tview.
+func MethodDropdown(requests []string, handleSelect func(text string, index int), handleInput func(event *tcell.EventKey) *tcell.EventKey) (methodDropdown *tview.DropDown) {
+	dropdown := tview.
 		NewDropDown().
 		SetCurrentOption(0).
 		SetOptions(requests, handleSelect).
@@ -46,25 +46,25 @@ func MethodDropdown(requests []string, handleSelect func(text string, index int)
 			tcell.StyleDefault.Background(tcell.ColorBlack),
 		)
 
-	request.
+	dropdown.
 		SetBorder(true).
 		SetInputCapture(handleInput)
 
-	return request
+	return dropdown
 }
 
-func CreateButton(handleSelect func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) *tview.Button {
-	create := tview.
+func CreateButton(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (createButton *tview.Button) {
+	button := tview.
 		NewButton("Connect").
 		SetLabelColor(tcell.ColorBlue).
 		SetStyle(tcell.StyleDefault.Background(tcell.ColorBlack).Bold(true)).
 		SetActivatedStyle(tcell.StyleDefault.Background(tcell.ColorBlack).Bold(true)).
-		SetSelectedFunc(handleSelect)
+		SetSelectedFunc(handleClick)
 
-	create.
+	button.
 		SetBorder(true).
 		SetBorderColor(tcell.ColorBlue).
 		SetInputCapture(handleInput)
 
-	return create
+	return button
 }

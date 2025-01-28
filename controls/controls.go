@@ -5,7 +5,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func Controls(app *tview.Application, query *tview.Flex, pages *tview.Pages, project *tview.TreeView, response *tview.Flex) {
+func Controls(app *tview.Application, pages *tview.Pages, query *tview.Flex, project *tview.TreeView, response *tview.Flex) {
 	app.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyCtrlQ:
