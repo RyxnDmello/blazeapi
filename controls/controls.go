@@ -29,12 +29,7 @@ func Controls(app *tview.Application, pages *tview.Pages, query *tview.Flex, pro
 			ShowQuery(app, pages, query)
 
 		case tcell.KeyEsc:
-			name, _ := pages.GetFrontPage()
-
-			if name == "QUERY_BODY_MODAL" {
-				ShowQuery(app, pages, query)
-				break
-			}
+			Escape(app, pages, query)
 		}
 
 		return event

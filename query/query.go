@@ -66,9 +66,9 @@ func InitializeQuery(app *tview.Application, response *tview.TextView) (*tview.F
 		func() {
 			body = requestBody.GetText()
 
-			data, _ := core.MakeRequest(method, url, body, []core.Header{})
+			request := core.MakeRequest(method, url, body)
 
-			response.SetText(data)
+			response.SetText(request.GetTime(true))
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {

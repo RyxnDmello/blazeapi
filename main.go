@@ -2,6 +2,7 @@ package main
 
 import (
 	"blazeapi/cmd"
+	"blazeapi/utils"
 
 	"github.com/rivo/tview"
 )
@@ -9,10 +10,15 @@ import (
 var app = tview.NewApplication()
 
 func main() {
+	defer func() {
+		if err := recover(); err != nil {
+			utils.Error(app, err)
+		}
+	}()
 
 	layout := cmd.Blaze(app)
 
 	if err := app.SetRoot(layout, true).Run(); err != nil {
-		panic(err)
+		panic("An Unexpected Error Has Occurred")
 	}
 }
