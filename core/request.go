@@ -11,11 +11,11 @@ import (
 )
 
 type Response struct {
-	data    string
-	status  string
-	code    int
-	time    int64
-	isError bool
+	data   string
+	status string
+	code   int
+	time   int64
+	err    bool
 }
 
 func (response *Response) GetData() string {
@@ -26,7 +26,7 @@ func (response *Response) GetStatus() string {
 	return response.status
 }
 
-func (response *Response) GetStatusCode() int {
+func (response *Response) GetCode() int {
 	return response.code
 }
 
@@ -39,7 +39,7 @@ func (response *Response) GetTime(milliseconds bool) string {
 }
 
 func (response *Response) IsError() bool {
-	return response.isError
+	return response.err
 }
 
 func MakeRequest(method string, url string, body string) (response Response) {
@@ -49,11 +49,11 @@ func MakeRequest(method string, url string, body string) (response Response) {
 
 	if err != nil {
 		return Response{
-			data:    "Invalid Request",
-			status:  "Invalid Request",
-			code:    404,
-			time:    0,
-			isError: true,
+			data:   "Invalid Request",
+			status: "Invalid Request",
+			code:   404,
+			time:   0,
+			err:    true,
 		}
 	}
 
@@ -69,11 +69,11 @@ func handleRequest(request *http.Request, duration time.Time) (response Response
 		elapsed := time.Since(duration).Milliseconds()
 
 		return Response{
-			data:    "Invalid Request",
-			status:  "Invalid Request",
-			code:    404,
-			time:    elapsed,
-			isError: true,
+			data:   "Invalid Request",
+			status: "Invalid Request",
+			code:   404,
+			time:   elapsed,
+			err:    true,
 		}
 	}
 
@@ -85,11 +85,11 @@ func handleRequest(request *http.Request, duration time.Time) (response Response
 		elapsed := time.Since(duration).Milliseconds()
 
 		return Response{
-			data:    "Invalid Request",
-			status:  "Invalid Request",
-			code:    404,
-			time:    elapsed,
-			isError: true,
+			data:   "Invalid Request",
+			status: "Invalid Request",
+			code:   404,
+			time:   elapsed,
+			err:    true,
 		}
 	}
 
@@ -98,10 +98,10 @@ func handleRequest(request *http.Request, duration time.Time) (response Response
 	elapsed := time.Since(duration).Milliseconds()
 
 	return Response{
-		data:    output,
-		status:  res.Status,
-		code:    res.StatusCode,
-		time:    elapsed,
-		isError: false,
+		data:   output,
+		status: res.Status,
+		code:   res.StatusCode,
+		time:   elapsed,
+		err:    false,
 	}
 }

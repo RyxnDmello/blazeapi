@@ -1,49 +1,93 @@
 package response
 
 import (
+	"fmt"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func InitializeResponse(app *tview.Application) (*tview.TextView, *tview.Flex) {
-	var responseBody *tview.TextView
-	var clearButton *tview.Button
+type Response struct {
+	body   *tview.TextView
+	status *tview.TextView
+	code   *tview.TextView
+	time   *tview.TextView
+}
 
-	responseBody = ResponseBody(
+func (response *Response) SetBody(body string) {
+	response.body.SetText(body).SetToggleHighlights(true)
+}
+
+func (response *Response) SetStatus(status string) {
+	response.status.SetText(status)
+}
+
+func (response *Response) SetCode(code int) {
+	response.code.SetText(fmt.Sprintf("%d", code))
+
+	if code < 300 {
+		response.code.SetBorderColor(tcell.ColorWhite)
+		return
+	}
+
+	response.code.SetTextColor(tcell.ColorRed)
+	response.code.SetBorderColor(tcell.ColorRed)
+}
+
+func (response *Response) SetTime(time string) {
+	response.time.SetText(time + "ms")
+}
+
+func (response *Response) Clear() {
+	response.body.Clear()
+	response.status.Clear().SetText("Status")
+	response.code.Clear().SetText("Code")
+	response.time.Clear().SetText("Time")
+}
+
+func InitializeResponse(app *tview.Application) (response Response, layout *tview.Flex) {
+	var clear *tview.Button
+
+	response.body = ResponseBody(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(clearButton)
+				app.SetFocus(clear)
 			}
 
 			return event
 		},
 	)
 
-	clearButton = ClearButton(
+	response.status = ResponseElement("Status")
+	response.time = ResponseElement("Time")
+	response.code = ResponseElement("Code")
+
+	clear = ClearButton(
 		func() {
-			responseBody.Clear()
+			response.Clear()
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(responseBody)
+				app.SetFocus(response.body)
 			}
 
 			return event
 		},
 	)
 
-	tabsLayout := tview.
+	details := tview.
 		NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(nil, 0, 1, false).
-		AddItem(nil, 0, 1, false).
-		AddItem(clearButton, 0, 1, false)
+		AddItem(response.time, 0, 1, false).
+		AddItem(response.status, 0, 1, false).
+		AddItem(response.code, 0, 1, false).
+		AddItem(clear, 0, 1, false)
 
-	responseLayout := tview.
+	layout = tview.
 		NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(responseBody, 0, 1, true).
-		AddItem(tabsLayout, 3, 1, true)
+		AddItem(response.body, 0, 1, true).
+		AddItem(details, 3, 1, true)
 
-	return responseBody, responseLayout
+	return response, layout
 }

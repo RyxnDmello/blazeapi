@@ -5,31 +5,43 @@ import (
 	"github.com/rivo/tview"
 )
 
-func ResponseBody(handleInput func(event *tcell.EventKey) *tcell.EventKey) (responseBody *tview.TextView) {
-	textView := tview.
+func ResponseBody(handleInput func(event *tcell.EventKey) *tcell.EventKey) (body *tview.TextView) {
+	body = tview.
 		NewTextView()
 
-	textView.
+	body.
 		SetBorder(true).
 		SetTitle(" 󰅪 Response ").
 		SetTitleAlign(tview.AlignLeft).
 		SetInputCapture(handleInput)
 
-	return textView
+	return body
 }
 
-func ClearButton(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (clearButton *tview.Button) {
-	clearButton = tview.
-		NewButton("Clear").
+func ResponseElement(label string) (element *tview.TextView) {
+	element = tview.
+		NewTextView().
+		SetText(label).
+		SetTextAlign(tview.AlignCenter)
+
+	element.
+		SetBorder(true)
+
+	return element
+}
+
+func ClearButton(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (clear *tview.Button) {
+	clear = tview.
+		NewButton(" 󰇾 Clear ").
 		SetStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).
 		SetDisabledStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).
 		SetActivatedStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).
 		SetSelectedFunc(handleClick)
 
-	clearButton.
+	clear.
 		SetBorder(true).
 		SetBackgroundColor(tcell.ColorNone).
 		SetInputCapture(handleInput)
 
-	return clearButton
+	return clear
 }

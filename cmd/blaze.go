@@ -15,14 +15,14 @@ var (
 
 	project *tview.TreeView
 
-	response       *tview.TextView
+	response       RESPONSE.Response
 	responseLayout *tview.Flex
 )
 
 func Blaze(app *tview.Application) *tview.Pages {
-	project = PROJECT.InitializeProject()
+	project = PROJECT.InitializeProject(app)
 	response, responseLayout = RESPONSE.InitializeResponse(app)
-	queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
+	_, queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
 
 	main := tview.
 		NewGrid().

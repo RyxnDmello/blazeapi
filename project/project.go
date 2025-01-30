@@ -2,7 +2,7 @@ package project
 
 import "github.com/rivo/tview"
 
-func InitializeProject() *tview.TreeView {
+func InitializeProject(app *tview.Application) *tview.TreeView {
 	project := tview.
 		NewTreeView()
 

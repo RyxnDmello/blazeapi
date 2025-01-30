@@ -1,91 +1,102 @@
 package query
 
 import (
-	"blazeapi/core"
 	"strings"
+
+	"blazeapi/core"
+	"blazeapi/response"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func InitializeQuery(app *tview.Application, response *tview.TextView) (*tview.Flex, *tview.Flex) {
-	var requestMethod *tview.DropDown
-	var requestQuery *tview.InputField
-	var requestButton *tview.Button
+type Query struct {
+	method *tview.DropDown
+	url    *tview.InputField
+	body   *tview.TextArea
+}
 
-	var method string
-	var body string
-	var url string
+func (query *Query) GetMethod() string {
+	_, method := query.method.GetCurrentOption()
+	return method
+}
 
-	requestBody, requestBodyModal := initializeQueryBody()
+func (query *Query) GetUrl() string {
+	return query.url.GetText()
+}
 
-	requestMethod = MethodDropdown(
+func (query *Query) GetBody() string {
+	return query.body.GetText()
+}
+
+func InitializeQuery(app *tview.Application, response response.Response) (query Query, layout *tview.Flex, modal *tview.Flex) {
+	var create *tview.Button
+
+	query.body, modal = initializeQueryBody()
+
+	query.method = MethodDropdown(
 		[]string{
 			"GET", "POST", "PATCH", "PUT", "DELETE",
 		},
-		func(text string, index int) {
-			method = text
-		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTab {
-				app.SetFocus(requestQuery)
+				app.SetFocus(query.url)
 			}
 
 			return event
 		},
 	)
 
-	requestQuery = RequestInput(
+	query.url = RequestUrl(
 		func(textToCheck string, lastChar rune) bool {
 			if !strings.HasPrefix(textToCheck, "http") {
-				requestQuery.SetFieldTextColor(tcell.ColorRed)
+				query.url.SetFieldTextColor(tcell.ColorRed)
 				return true
 			}
 
 			if !strings.Contains(textToCheck, "/") {
-				requestQuery.SetFieldTextColor(tcell.ColorRed)
+				query.url.SetFieldTextColor(tcell.ColorRed)
 				return true
 			}
 
-			url = textToCheck
-
-			requestQuery.SetFieldTextColor(tcell.ColorWhite)
+			query.url.SetFieldTextColor(tcell.ColorWhite)
 
 			return true
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(requestButton)
+				app.SetFocus(create)
 			}
 
 			return event
 		},
 	)
 
-	requestButton = CreateButton(
+	create = CreateButton(
 		func() {
-			body = requestBody.GetText()
+			request := core.MakeRequest(query.GetMethod(), query.GetUrl(), query.GetBody())
 
-			request := core.MakeRequest(method, url, body)
-
-			response.SetText(request.GetTime(true))
+			response.SetBody(request.GetData())
+			response.SetTime(request.GetTime(true))
+			response.SetCode(request.GetCode())
+			response.SetStatus(request.GetStatus())
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(requestMethod)
+				app.SetFocus(query.method)
 			}
 
 			return event
 		},
 	)
 
-	flex := tview.NewFlex().
+	layout = tview.NewFlex().
 		SetDirection(tview.FlexColumn).
-		AddItem(requestMethod, 0, 1, false).
-		AddItem(requestQuery, 0, 5, true).
-		AddItem(requestButton, 0, 1, false)
+		AddItem(query.method, 0, 1, false).
+		AddItem(query.url, 0, 5, true).
+		AddItem(create, 0, 1, false)
 
-	return flex, requestBodyModal
+	return query, layout, modal
 }
 
 func initializeQueryBody() (*tview.TextArea, *tview.Flex) {
