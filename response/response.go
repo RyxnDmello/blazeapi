@@ -40,9 +40,8 @@ func (response *Response) SetTime(time string) {
 
 func (response *Response) Clear() {
 	response.body.Clear()
-	response.status.Clear().SetText("Status")
-	response.code.Clear().SetText("Code")
 	response.time.Clear().SetText("Time")
+	response.status.Clear().SetText("Status")
 }
 
 func InitializeResponse(app *tview.Application) (response Response, layout *tview.Flex) {
@@ -58,9 +57,8 @@ func InitializeResponse(app *tview.Application) (response Response, layout *tvie
 		},
 	)
 
-	response.status = ResponseElement("Status")
 	response.time = ResponseElement("Time")
-	response.code = ResponseElement("Code")
+	response.status = ResponseElement("Status")
 
 	clear = ClearButton(
 		func() {
@@ -80,7 +78,6 @@ func InitializeResponse(app *tview.Application) (response Response, layout *tvie
 		SetDirection(tview.FlexColumn).
 		AddItem(response.time, 0, 1, false).
 		AddItem(response.status, 0, 1, false).
-		AddItem(response.code, 0, 1, false).
 		AddItem(clear, 0, 1, false)
 
 	layout = tview.

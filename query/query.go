@@ -1,6 +1,7 @@
 package query
 
 import (
+	"slices"
 	"strings"
 
 	"blazeapi/core"
@@ -9,6 +10,8 @@ import (
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
+
+var options []string = []string{"GET", "POST", "PATCH", "PUT", "DELETE"}
 
 type Query struct {
 	method *tview.DropDown
@@ -21,12 +24,29 @@ func (query *Query) GetMethod() string {
 	return method
 }
 
+func (query *Query) SetMethod(method string) {
+	if index := slices.Index(options, method); index != -1 {
+		query.method.SetCurrentOption(index)
+		return
+	}
+
+	query.method.SetCurrentOption(0)
+}
+
 func (query *Query) GetUrl() string {
 	return query.url.GetText()
 }
 
+func (query *Query) SetUrl(url string) {
+	query.url.SetText(url)
+}
+
 func (query *Query) GetBody() string {
 	return query.body.GetText()
+}
+
+func (query *Query) SetBody(body string) {
+	query.body.SetText(body, false)
 }
 
 func InitializeQuery(app *tview.Application, response response.Response) (query Query, layout *tview.Flex, modal *tview.Flex) {
@@ -35,9 +55,7 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 	query.body, modal = initializeQueryBody()
 
 	query.method = MethodDropdown(
-		[]string{
-			"GET", "POST", "PATCH", "PUT", "DELETE",
-		},
+		options,
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTab {
 				app.SetFocus(query.url)
@@ -78,7 +96,6 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 
 			response.SetBody(request.GetData())
 			response.SetTime(request.GetTime(true))
-			response.SetCode(request.GetCode())
 			response.SetStatus(request.GetStatus())
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {

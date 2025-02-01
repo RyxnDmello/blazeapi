@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	query          QUERY.Query
 	queryLayout    *tview.Flex
 	queryBodyModal *tview.Flex
 
@@ -20,9 +21,9 @@ var (
 )
 
 func Blaze(app *tview.Application) *tview.Pages {
-	project = PROJECT.InitializeProject(app)
 	response, responseLayout = RESPONSE.InitializeResponse(app)
-	_, queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
+	query, queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
+	project = PROJECT.InitializeProject(app, query, response)
 
 	main := tview.
 		NewGrid().
