@@ -5,7 +5,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func ResponseBody(handleInput func(event *tcell.EventKey) *tcell.EventKey) (body *tview.TextView) {
+func Body(handleInput func(event *tcell.EventKey) *tcell.EventKey) (body *tview.TextView) {
 	body = tview.
 		NewTextView()
 
@@ -18,7 +18,7 @@ func ResponseBody(handleInput func(event *tcell.EventKey) *tcell.EventKey) (body
 	return body
 }
 
-func ResponseElement(label string) (element *tview.TextView) {
+func Element(label string) (element *tview.TextView) {
 	element = tview.
 		NewTextView().
 		SetText(label).
@@ -30,7 +30,7 @@ func ResponseElement(label string) (element *tview.TextView) {
 	return element
 }
 
-func ClearButton(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (clear *tview.Button) {
+func Clear(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (clear *tview.Button) {
 	clear = tview.
 		NewButton(" 󰇾 Clear ").
 		SetStyle(tcell.StyleDefault.Background(tcell.ColorBlack)).

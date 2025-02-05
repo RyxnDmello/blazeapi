@@ -1,6 +1,9 @@
 package project
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type Node struct {
 	kind string
@@ -30,16 +33,36 @@ func (node *Node) Kind() string {
 	return node.kind
 }
 
-func (node *Node) Path() string {
-	return node.path
-}
-
-func (node *Node) Name(complete bool) string {
-	if complete {
-		return fmt.Sprintf(" %s %s ", node.icon, node.name)
+func (node *Node) Path(parent bool) string {
+	if node.IsCollection() {
+		return node.path
 	}
 
-	return node.name
+	if !parent {
+		return node.path
+	}
+
+	path, valid := strings.CutSuffix(node.path, node.Name(false, true))
+
+	if !valid {
+		panic("Invalid Path Detected")
+	}
+
+	return path
+}
+
+func (node *Node) Name(icon bool, extension bool) string {
+	var name string = node.name
+
+	if icon {
+		name = fmt.Sprintf("%s %s", node.icon, name)
+	}
+
+	if !extension {
+		name = strings.Split(name, ".")[0]
+	}
+
+	return name
 }
 
 func (node *Node) Icon() string {

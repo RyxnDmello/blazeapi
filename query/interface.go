@@ -5,7 +5,7 @@ import (
 	"github.com/rivo/tview"
 )
 
-func MethodDropdown(requests []string, handleInput func(event *tcell.EventKey) *tcell.EventKey) (method *tview.DropDown) {
+func Method(requests []string, handleInput func(event *tcell.EventKey) *tcell.EventKey) (method *tview.DropDown) {
 	method = tview.
 		NewDropDown().
 		SetCurrentOption(0).
@@ -24,7 +24,7 @@ func MethodDropdown(requests []string, handleInput func(event *tcell.EventKey) *
 	return method
 }
 
-func RequestUrl(handleAccept func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) (url *tview.InputField) {
+func Url(handleAccept func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) (url *tview.InputField) {
 	url = tview.
 		NewInputField().
 		SetPlaceholder("Enter URL").
@@ -41,7 +41,7 @@ func RequestUrl(handleAccept func(textToCheck string, lastChar rune) bool, handl
 	return url
 }
 
-func RequestBody() (body *tview.TextArea) {
+func Body() (body *tview.TextArea) {
 	body = tview.
 		NewTextArea()
 
@@ -53,7 +53,7 @@ func RequestBody() (body *tview.TextArea) {
 	return body
 }
 
-func CreateButton(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (create *tview.Button) {
+func Create(handleClick func(), handleInput func(event *tcell.EventKey) *tcell.EventKey) (create *tview.Button) {
 	create = tview.
 		NewButton("Connect").
 		SetLabelColor(tcell.ColorBlue).

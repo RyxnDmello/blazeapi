@@ -54,7 +54,7 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 
 	query.body, modal = initializeQueryBody()
 
-	query.method = MethodDropdown(
+	query.method = Method(
 		options,
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTab {
@@ -65,7 +65,7 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 		},
 	)
 
-	query.url = RequestUrl(
+	query.url = Url(
 		func(textToCheck string, lastChar rune) bool {
 			if !strings.HasPrefix(textToCheck, "http") {
 				query.url.SetFieldTextColor(tcell.ColorRed)
@@ -90,7 +90,7 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 		},
 	)
 
-	create = CreateButton(
+	create = Create(
 		func() {
 			request := core.MakeRequest(query.GetMethod(), query.GetUrl(), query.GetBody())
 
@@ -116,8 +116,8 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 	return query, layout, modal
 }
 
-func initializeQueryBody() (*tview.TextArea, *tview.Flex) {
-	requestBody := RequestBody()
+func initializeQueryBody() (requestBody *tview.TextArea, requestBodyModal *tview.Flex) {
+	requestBody = Body()
 
 	alignment := tview.
 		NewFlex().
@@ -126,8 +126,9 @@ func initializeQueryBody() (*tview.TextArea, *tview.Flex) {
 		AddItem(requestBody, 15, 1, true).
 		AddItem(nil, 0, 1, false)
 
-	requestBodyModal := tview.
+	requestBodyModal = tview.
 		NewFlex().
+		SetDirection(tview.FlexColumn).
 		AddItem(nil, 0, 1, false).
 		AddItem(alignment, 60, 1, true).
 		AddItem(nil, 0, 1, false)

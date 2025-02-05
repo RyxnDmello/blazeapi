@@ -14,7 +14,8 @@ var (
 	queryLayout    *tview.Flex
 	queryBodyModal *tview.Flex
 
-	project *tview.TreeView
+	project            *tview.TreeView
+	projectCreateModal *tview.Flex
 
 	response       RESPONSE.Response
 	responseLayout *tview.Flex
@@ -23,7 +24,7 @@ var (
 func Blaze(app *tview.Application) *tview.Pages {
 	response, responseLayout = RESPONSE.InitializeResponse(app)
 	query, queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
-	project = PROJECT.InitializeProject(app, query, response)
+	project, projectCreateModal = PROJECT.InitializeProject(app, query, response)
 
 	main := tview.
 		NewGrid().
@@ -35,9 +36,20 @@ func Blaze(app *tview.Application) *tview.Pages {
 	pages := tview.
 		NewPages().
 		AddPage("QUERY_BODY_MODAL", queryBodyModal, true, false).
+		AddPage("PROJECT_CREATE_MODAL", projectCreateModal, true, false).
 		AddPage("MAIN", main, true, true)
 
-	CONTROLS.Controls(app, pages, queryLayout, project, responseLayout)
+	CONTROLS.Controls(
+		app,
+		pages,
+		query,
+		queryLayout,
+		queryBodyModal,
+		project,
+		projectCreateModal,
+		response,
+		responseLayout,
+	)
 
 	return pages
 }

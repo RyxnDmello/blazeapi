@@ -6,21 +6,16 @@ import (
 )
 
 type API struct {
-	Url         string `json:"url"`
-	Body        string `json:"body"`
-	Description string `json:"description"`
+	Method string `json:"method"`
+	Url    string `json:"url"`
 }
 
 func (api *API) GetUrl() string {
 	return api.Url
 }
 
-func (api *API) GetBody() string {
-	return api.Body
-}
-
-func (api *API) GetDescription() string {
-	return api.Description
+func (api *API) GetMethod() string {
+	return api.Method
 }
 
 func CreateAPI(path string) (api API) {

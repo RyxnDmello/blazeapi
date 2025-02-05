@@ -47,7 +47,7 @@ func (response *Response) Clear() {
 func InitializeResponse(app *tview.Application) (response Response, layout *tview.Flex) {
 	var clear *tview.Button
 
-	response.body = ResponseBody(
+	response.body = Body(
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
 				app.SetFocus(clear)
@@ -57,10 +57,10 @@ func InitializeResponse(app *tview.Application) (response Response, layout *tvie
 		},
 	)
 
-	response.time = ResponseElement("Time")
-	response.status = ResponseElement("Status")
+	response.time = Element("Time")
+	response.status = Element("Status")
 
-	clear = ClearButton(
+	clear = Clear(
 		func() {
 			response.Clear()
 		},
