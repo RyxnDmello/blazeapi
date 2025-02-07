@@ -13,9 +13,9 @@ func Controls(
 	pages *tview.Pages,
 	query query.Query,
 	queryLayout *tview.Flex,
-	queryBodyModal *tview.Flex,
+	bodyModal *tview.Flex,
 	project *tview.TreeView,
-	projectCreateModal *tview.Flex,
+	createNodeModal *tview.Flex,
 	response response.Response,
 	responseLayout *tview.Flex,
 ) {
@@ -28,12 +28,12 @@ func Controls(
 
 		case tcell.KeyCtrlB:
 			if queryLayout.HasFocus() {
-				OpenModal("QUERY_BODY_MODAL", pages)
+				OpenModal("BODY_MODAL", pages)
 				break
 			}
 
-			if ModalOpen("QUERY_BODY_MODAL", pages) {
-				CloseModal("QUERY_BODY_MODAL", pages)
+			if IsOpen("BODY_MODAL", pages) {
+				CloseModal("BODY_MODAL", pages)
 				app.SetFocus(queryLayout)
 			}
 
@@ -43,12 +43,12 @@ func Controls(
 
 		case tcell.KeyCtrlN:
 			if project.HasFocus() {
-				OpenModal("PROJECT_CREATE_MODAL", pages)
+				OpenModal("CREATE_NODE_MODAL", pages)
 				break
 			}
 
-			if ModalOpen("PROJECT_CREATE_MODAL", pages) {
-				CloseModal("PROJECT_CREATE_MODAL", pages)
+			if IsOpen("CREATE_NODE_MODAL", pages) {
+				CloseModal("CREATE_NODE_MODAL", pages)
 				app.SetFocus(project)
 			}
 

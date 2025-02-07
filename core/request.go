@@ -12,30 +12,30 @@ import (
 
 type Response struct {
 	data   string
-	status string
 	code   int
 	time   int64
+	status string
 	err    bool
 }
 
-func (response *Response) GetData() string {
+func (response *Response) Data() string {
 	return response.data
 }
 
-func (response *Response) GetStatus() string {
-	return response.status
-}
-
-func (response *Response) GetCode() int {
+func (response *Response) Code() int {
 	return response.code
 }
 
-func (response *Response) GetTime(milliseconds bool) string {
+func (response *Response) Time(milliseconds bool) string {
 	if milliseconds {
 		return fmt.Sprintf("%d", response.time)
 	}
 
 	return fmt.Sprintf("%d", response.time*1000)
+}
+
+func (response *Response) Status() string {
+	return response.status
 }
 
 func (response *Response) IsError() bool {

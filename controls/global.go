@@ -35,19 +35,19 @@ func CloseEveryModal(pages *tview.Pages) {
 	}
 }
 
-func ModalOpen(name string, pages *tview.Pages) (open bool) {
+func IsOpen(name string, pages *tview.Pages) (open bool) {
 	front, _ := pages.GetFrontPage()
 	return front == name
 }
 
 func Escape(app *tview.Application, pages *tview.Pages) {
-	if ModalOpen("QUERY_BODY_MODAL", pages) {
+	if IsOpen("QUERY_BODY_MODAL", pages) {
 		CloseModal("QUERY_BODY_MODAL", pages)
 		return
 	}
 
-	if ModalOpen("PROJECT_CREATE_MODAL", pages) {
-		CloseModal("PROJECT_CREATE_MODAL", pages)
+	if IsOpen("PROJECT_CREATE_NODE_MODAL", pages) {
+		CloseModal("PROJECT_CREATE_NODE_MODAL", pages)
 		return
 	}
 
