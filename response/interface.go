@@ -1,13 +1,16 @@
 package response
 
 import (
+	"blazeapi/utils"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 func Body(handleInput func(event *tcell.EventKey) *tcell.EventKey) (body *tview.TextView) {
 	body = tview.
-		NewTextView()
+		NewTextView().
+		SetText(utils.INTRODUCTION)
 
 	body.
 		SetBorder(true).

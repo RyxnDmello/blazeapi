@@ -26,12 +26,16 @@ func Blaze(app *tview.Application) *tview.Pages {
 	query, queryLayout, bodyModal = QUERY.InitializeQuery(app, response)
 	project, createNodeModal = PROJECT.InitializeProject(app, query, response)
 
+	layout := tview.
+		NewFlex().
+		AddItem(project, 0, 1, true).
+		AddItem(responseLayout, 0, 2, true)
+
 	main := tview.
 		NewGrid().
 		SetRows(3, 0).
 		AddItem(queryLayout, 0, 0, 1, 2, 0, 0, false).
-		AddItem(project, 1, 0, 1, 1, 0, 0, true).
-		AddItem(responseLayout, 1, 1, 1, 1, 0, 0, false)
+		AddItem(layout, 1, 0, 1, 2, 0, 0, true)
 
 	pages := tview.
 		NewPages().

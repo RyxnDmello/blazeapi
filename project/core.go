@@ -14,7 +14,11 @@ import (
 )
 
 func InitializeProject(app *tview.Application, query query.Query, response response.Response) (project *tview.TreeView, createNodeModal *tview.Flex) {
-	root := tview.NewTreeNode("./test")
+	node := CreateNode("Test", "./test", true)
+
+	root := tview.
+		NewTreeNode(node.Name(true, false)).
+		SetReference(node)
 
 	createDirectory(root, "./test")
 
@@ -22,8 +26,7 @@ func InitializeProject(app *tview.Application, query query.Query, response respo
 		NewTreeView().
 		SetRoot(root).
 		SetCurrentNode(root).
-		SetGraphics(false).
-		SetTopLevel(1)
+		SetGraphicsColor(tcell.NewRGBColor(75, 75, 75))
 
 	createNodeModal = initializeCreateNodeModal(app, project)
 

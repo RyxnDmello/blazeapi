@@ -1,8 +1,9 @@
 package controls
 
 import (
-	"blazeapi/utils"
 	"strings"
+
+	"blazeapi/utils"
 
 	"github.com/rivo/tview"
 )
@@ -41,13 +42,13 @@ func IsOpen(name string, pages *tview.Pages) (open bool) {
 }
 
 func Escape(app *tview.Application, pages *tview.Pages) {
-	if IsOpen("QUERY_BODY_MODAL", pages) {
-		CloseModal("QUERY_BODY_MODAL", pages)
+	if IsOpen("BODY_MODAL", pages) {
+		CloseModal("BODY_MODAL", pages)
 		return
 	}
 
-	if IsOpen("PROJECT_CREATE_NODE_MODAL", pages) {
-		CloseModal("PROJECT_CREATE_NODE_MODAL", pages)
+	if IsOpen("CREATE_NODE_MODAL", pages) {
+		CloseModal("CREATE_NODE_MODAL", pages)
 		return
 	}
 
