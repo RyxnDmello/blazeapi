@@ -3,16 +3,19 @@ package project
 import (
 	"fmt"
 	"strings"
+
+	"github.com/rivo/tview"
 )
 
 type Node struct {
-	kind string
-	path string
-	name string
-	icon string
+	parent *tview.TreeNode
+	kind   string
+	path   string
+	name   string
+	icon   string
 }
 
-func CreateNode(name string, path string, isCollection bool) (node Node) {
+func CreateNode(parent *tview.TreeNode, name string, path string, isCollection bool) (node Node) {
 	kind := "API"
 	icon := "󰅩"
 
@@ -22,10 +25,11 @@ func CreateNode(name string, path string, isCollection bool) (node Node) {
 	}
 
 	return Node{
-		kind: kind,
-		path: path,
-		name: name,
-		icon: icon,
+		parent: parent,
+		kind:   kind,
+		path:   path,
+		name:   name,
+		icon:   icon,
 	}
 }
 
@@ -71,4 +75,22 @@ func (node *Node) Icon() string {
 
 func (node *Node) IsCollection() bool {
 	return node.kind == "COLLECTION"
+}
+
+func (node *Node) Parent() (parent *tview.TreeNode) {
+	return node.parent
+}
+
+func (node *Node) ParentNode() (parent *Node) {
+	reference, ok := node.parent.GetReference().(Node)
+
+	if !ok {
+		return nil
+	}
+
+	return &reference
+}
+
+func (node *Node) Collapse() {
+
 }

@@ -13,8 +13,8 @@ import (
 	"github.com/rivo/tview"
 )
 
-func InitializeProject(app *tview.Application, query query.Query, response response.Response) (project *tview.TreeView, createNodeModal *tview.Flex) {
-	node := CreateNode("Test", "./test", true)
+func InitializeProject(app *tview.Application, query query.Query, response response.Response) (project *tview.TreeView, createNodeModal *tview.Flex, deleteNodeModal *tview.Flex) {
+	node := CreateNode(nil, "Test", "./test", true)
 
 	root := tview.
 		NewTreeNode(node.Name(true, false)).
@@ -29,6 +29,7 @@ func InitializeProject(app *tview.Application, query query.Query, response respo
 		SetGraphicsColor(tcell.NewRGBColor(75, 75, 75))
 
 	createNodeModal = initializeCreateNodeModal(app, project)
+	deleteNodeModal = initializeDeleteNodeModal(project)
 
 	project.SetSelectedFunc(func(treeNode *tview.TreeNode) {
 		node, ok := treeNode.GetReference().(Node)
@@ -62,7 +63,7 @@ func InitializeProject(app *tview.Application, query query.Query, response respo
 		SetBorderPadding(1, 0, 1, 0).
 		SetTitleAlign(tview.AlignLeft)
 
-	return project, createNodeModal
+	return project, createNodeModal, deleteNodeModal
 }
 
 func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) (createNodeModal *tview.Flex) {
@@ -94,7 +95,16 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 	createAPI = Button(
 		"Add Request",
 		func() {
+			if strings.HasSuffix(input.GetText(), "_") {
+				input.SetFieldTextColor(tcell.ColorRed)
+				return
+			}
+
 			treeNode := project.GetCurrentNode()
+
+			if treeNode == nil {
+				return
+			}
 
 			node, ok := treeNode.GetReference().(Node)
 
@@ -102,18 +112,23 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 				return
 			}
 
-			name := input.GetText()
+			message, success := core.AddAPI(input.GetText(), node.Path(true))
 
-			if strings.HasSuffix(name, "_") {
-				input.SetFieldTextColor(tcell.ColorRed)
+			if success {
+				input.SetText(message)
+			}
+
+			if node.IsCollection() {
+				if !treeNode.IsExpanded() {
+					collapseDirectory(treeNode)
+					return
+				}
+
+				expandDirectory(treeNode)
 				return
 			}
 
-			_, success := core.AddAPI(name, node.Path(true))
-
-			if success {
-				input.SetText("")
-			}
+			expandDirectory(node.parent)
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
@@ -127,7 +142,16 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 	createFolder = Button(
 		"Add Folder",
 		func() {
+			if strings.HasSuffix(input.GetText(), "_") {
+				input.SetFieldTextColor(tcell.ColorRed)
+				return
+			}
+
 			treeNode := project.GetCurrentNode()
+
+			if treeNode == nil {
+				return
+			}
 
 			node, ok := treeNode.GetReference().(Node)
 
@@ -135,20 +159,23 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 				return
 			}
 
-			name := input.GetText()
+			message, success := core.AddCollection(input.GetText(), node.Path(true))
 
-			if strings.HasSuffix(name, "_") {
-				input.SetFieldTextColor(tcell.ColorRed)
+			if success {
+				input.SetText(message)
+			}
+
+			if node.IsCollection() {
+				if !treeNode.IsExpanded() {
+					collapseDirectory(treeNode)
+					return
+				}
+
+				expandDirectory(treeNode)
 				return
 			}
 
-			_, success := core.AddCollection(name, node.Path(true))
-
-			if success {
-				input.SetText("")
-			}
-
-			treeNode.Collapse().ClearChildren()
+			expandDirectory(node.parent)
 		},
 		func(event *tcell.EventKey) *tcell.EventKey {
 			if event.Key() == tcell.KeyTAB {
@@ -188,6 +215,64 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 	return createNodeModal
 }
 
+func initializeDeleteNodeModal(project *tview.TreeView) (createNodeModal *tview.Flex) {
+	var text *tview.TextView
+	var delete *tview.Button
+
+	text = Display("Are you sure want to delete?")
+
+	delete = Button(
+		"Delete",
+		func() {
+			node, ok := project.GetCurrentNode().GetReference().(Node)
+
+			if !ok {
+				return
+			}
+
+			if node.IsCollection() {
+				core.DeleteCollection(node.path)
+			}
+
+			if !node.IsCollection() {
+				core.DeleteAPI(node.path)
+			}
+
+			expandDirectory(node.parent)
+		},
+		func(event *tcell.EventKey) *tcell.EventKey {
+			return event
+		},
+	)
+
+	layout := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(text, 0, 1, false).
+		AddItem(delete, 0, 1, true)
+
+	layout.
+		SetBorder(true).
+		SetTitle("  Create Artifact ").
+		SetTitleAlign(tview.AlignLeft).
+		SetBorderPadding(0, 0, 1, 1)
+
+	alignment := tview.
+		NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).
+		AddItem(layout, 8, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	createNodeModal = tview.
+		NewFlex().
+		SetDirection(tview.FlexColumn).
+		AddItem(nil, 0, 1, false).
+		AddItem(alignment, 50, 1, true).
+		AddItem(nil, 0, 1, false)
+
+	return createNodeModal
+}
+
 func createDirectory(parent *tview.TreeNode, path string) {
 	entries, err := os.ReadDir(path)
 
@@ -199,7 +284,7 @@ func createDirectory(parent *tview.TreeNode, path string) {
 		name := entry.Name()
 		path := filepath.Join(path, name)
 
-		node := CreateNode(name, path, entry.IsDir())
+		node := CreateNode(parent, name, path, entry.IsDir())
 
 		child := tview.
 			NewTreeNode(node.Name(true, false)).
@@ -208,4 +293,44 @@ func createDirectory(parent *tview.TreeNode, path string) {
 
 		parent.AddChild(child)
 	}
+}
+
+func expandDirectory(treeNode *tview.TreeNode) {
+	if treeNode == nil {
+		return
+	}
+
+	node, ok := treeNode.GetReference().(Node)
+
+	if !ok {
+		return
+	}
+
+	if node.IsCollection() {
+		treeNode.Collapse().ClearChildren().Expand()
+		createDirectory(treeNode, node.path)
+		return
+	}
+
+	node.parent.Collapse().ClearChildren().Expand()
+	createDirectory(node.parent, node.ParentNode().path)
+}
+
+func collapseDirectory(treeNode *tview.TreeNode) {
+	if treeNode == nil {
+		return
+	}
+
+	node, ok := treeNode.GetReference().(Node)
+
+	if !ok {
+		return
+	}
+
+	if node.IsCollection() {
+		treeNode.Collapse().ClearChildren()
+		return
+	}
+
+	node.parent.Collapse().ClearChildren()
 }

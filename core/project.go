@@ -19,15 +19,35 @@ func AddAPI(name string, path string) (message string, success bool) {
 		return message, success
 	}
 
-	file := fmt.Sprintf("%s%s", name, ".json")
+	api := fmt.Sprintf("%s%s", name, ".json")
 
-	err := os.WriteFile(filepath.Join(path, file), []byte(template), os.ModePerm)
+	path, err := filepath.Abs(filepath.Join(path, api))
+
+	if err != nil {
+		panic("Invalid Path Provided")
+	}
+
+	err = os.WriteFile(path, []byte(template), os.ModePerm)
 
 	if err != nil {
 		return "Failed To Add API", false
 	}
 
 	return message, success
+}
+
+func DeleteAPI(path string) {
+	path, err := filepath.Abs(path)
+
+	if err != nil {
+		panic("Invalid Path Provided")
+	}
+
+	err = os.Remove(path)
+
+	if err != nil {
+		panic("Invalid API Path")
+	}
 }
 
 func AddCollection(name string, path string) (message string, success bool) {
@@ -37,7 +57,13 @@ func AddCollection(name string, path string) (message string, success bool) {
 		return message, success
 	}
 
-	err := os.Mkdir(filepath.Join(path, name), os.ModePerm)
+	path, err := filepath.Abs(filepath.Join(path, name))
+
+	if err != nil {
+		panic("Invalid Path Provided")
+	}
+
+	err = os.Mkdir(path, os.ModePerm)
 
 	if err != nil {
 		return "Failed To Add Collection", false
@@ -46,11 +72,25 @@ func AddCollection(name string, path string) (message string, success bool) {
 	return message, success
 }
 
+func DeleteCollection(path string) {
+	path, err := filepath.Abs(path)
+
+	if err != nil {
+		panic("Invalid Path Provided")
+	}
+
+	err = os.RemoveAll(path)
+
+	if err != nil {
+		panic("Invalid Collection Path")
+	}
+}
+
 func validate(kind string, name string, path string) (message string, success bool) {
 	entries, err := os.ReadDir(path)
 
 	if err != nil {
-		return "Invalid Path Provided", false
+		panic(err.Error())
 	}
 
 	for _, entry := range entries {

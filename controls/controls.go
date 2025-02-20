@@ -16,6 +16,7 @@ func Controls(
 	bodyModal *tview.Flex,
 	project *tview.TreeView,
 	createNodeModal *tview.Flex,
+	deleteNodeModal *tview.Flex,
 	response response.Response,
 	responseLayout *tview.Flex,
 ) {
@@ -49,6 +50,17 @@ func Controls(
 
 			if IsOpen("CREATE_NODE_MODAL", pages) {
 				CloseModal("CREATE_NODE_MODAL", pages)
+				app.SetFocus(project)
+			}
+
+		case tcell.KeyCtrlD:
+			if project.HasFocus() {
+				OpenModal("DELETE_NODE_MODAL", pages)
+				break
+			}
+
+			if IsOpen("DELETE_NODE_MODAL", pages) {
+				CloseModal("DELETE_NODE_MODAL", pages)
 				app.SetFocus(project)
 			}
 

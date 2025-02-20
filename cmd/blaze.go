@@ -16,6 +16,7 @@ var (
 
 	project         *tview.TreeView
 	createNodeModal *tview.Flex
+	deleteNodeModal *tview.Flex
 
 	response       RESPONSE.Response
 	responseLayout *tview.Flex
@@ -24,7 +25,7 @@ var (
 func Blaze(app *tview.Application) *tview.Pages {
 	response, responseLayout = RESPONSE.InitializeResponse(app)
 	query, queryLayout, bodyModal = QUERY.InitializeQuery(app, response)
-	project, createNodeModal = PROJECT.InitializeProject(app, query, response)
+	project, createNodeModal, deleteNodeModal = PROJECT.InitializeProject(app, query, response)
 
 	layout := tview.
 		NewFlex().
@@ -40,6 +41,7 @@ func Blaze(app *tview.Application) *tview.Pages {
 	pages := tview.
 		NewPages().
 		AddPage("BODY_MODAL", bodyModal, true, false).
+		AddPage("DELETE_NODE_MODAL", deleteNodeModal, true, false).
 		AddPage("CREATE_NODE_MODAL", createNodeModal, true, false).
 		AddPage("MAIN", main, true, true)
 
@@ -51,6 +53,7 @@ func Blaze(app *tview.Application) *tview.Pages {
 		bodyModal,
 		project,
 		createNodeModal,
+		deleteNodeModal,
 		response,
 		responseLayout,
 	)

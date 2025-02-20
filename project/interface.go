@@ -7,6 +7,19 @@ import (
 	"github.com/rivo/tview"
 )
 
+func Display(label string) (text *tview.TextView) {
+	text = tview.
+		NewTextView().
+		SetText(label).
+		SetTextAlign(tview.AlignLeft)
+
+	text.
+		SetBorder(true).
+		SetBorderPadding(0, 0, 1, 1)
+
+	return text
+}
+
 func Input(placeholder string, handleAcceptance func(textToCheck string, lastChar rune) bool, handleInput func(event *tcell.EventKey) *tcell.EventKey) (input *tview.InputField) {
 	input = tview.
 		NewInputField().

@@ -52,5 +52,10 @@ func Escape(app *tview.Application, pages *tview.Pages) {
 		return
 	}
 
+	if IsOpen("DELETE_NODE_MODAL", pages) {
+		CloseModal("DELETE_NODE_MODAL", pages)
+		return
+	}
+
 	utils.Exit(app, "Terminated Successfully")
 }
