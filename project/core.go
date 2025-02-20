@@ -119,11 +119,6 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 			}
 
 			if node.IsCollection() {
-				if !treeNode.IsExpanded() {
-					collapseDirectory(treeNode)
-					return
-				}
-
 				expandDirectory(treeNode)
 				return
 			}
@@ -166,11 +161,6 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 			}
 
 			if node.IsCollection() {
-				if !treeNode.IsExpanded() {
-					collapseDirectory(treeNode)
-					return
-				}
-
 				expandDirectory(treeNode)
 				return
 			}

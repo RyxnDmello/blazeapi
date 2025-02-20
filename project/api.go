@@ -10,14 +10,6 @@ type API struct {
 	Url    string `json:"url"`
 }
 
-func (api *API) GetUrl() string {
-	return api.Url
-}
-
-func (api *API) GetMethod() string {
-	return api.Method
-}
-
 func CreateAPI(path string) (api API) {
 	file, err := os.ReadFile(path)
 
@@ -28,4 +20,12 @@ func CreateAPI(path string) (api API) {
 	json.Unmarshal(file, &api)
 
 	return api
+}
+
+func (api *API) GetUrl() string {
+	return api.Url
+}
+
+func (api *API) GetMethod() string {
+	return api.Method
 }
