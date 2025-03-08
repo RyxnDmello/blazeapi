@@ -5,68 +5,87 @@ import (
 
 	"blazeapi/core"
 	"blazeapi/response"
+	"blazeapi/utils"
+	"blazeapi/widgets"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
+var METHODS []string = []string{"GET", "POST", "PATCH", "PUT", "DELETE"}
+
 func InitializeQuery(app *tview.Application, response response.Response) (query Query, layout *tview.Flex, bodyModal *tview.Flex) {
 	var create *tview.Button
 
-	query.method = Method(
-		methods,
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTab {
-				app.SetFocus(query.url)
-			}
+	query.method = widgets.
+		NewDropdown().
+		SetOptions(METHODS).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTab {
+					app.SetFocus(query.url)
+				}
 
-			return event
-		},
-	)
+				return event
+			},
+		).
+		Render()
 
-	query.url = Url(
-		func(textToCheck string, lastChar rune) bool {
-			if !strings.HasPrefix(textToCheck, "http") {
-				query.url.SetFieldTextColor(tcell.ColorRed)
+	query.url = widgets.
+		NewInput().
+		SetPlaceholder("Enter Query").
+		HandleAcceptance(
+			func(textToCheck string, lastChar rune) bool {
+				if !strings.HasPrefix(textToCheck, "http") {
+					query.url.SetFieldTextColor(tcell.ColorRed)
+					return true
+				}
+
+				if !strings.Contains(textToCheck, "/") {
+					query.url.SetFieldTextColor(tcell.ColorRed)
+					return true
+				}
+
+				query.url.SetFieldTextColor(tcell.ColorWhite)
+
 				return true
-			}
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(create)
+				}
 
-			if !strings.Contains(textToCheck, "/") {
-				query.url.SetFieldTextColor(tcell.ColorRed)
-				return true
-			}
+				return event
+			},
+		).
+		Render()
 
-			query.url.SetFieldTextColor(tcell.ColorWhite)
+	query.body, bodyModal = initializeQueryBody(app)
 
-			return true
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(create)
-			}
+	create = widgets.
+		NewButton().
+		SetLabel("Create").
+		HandleSelect(
+			func() {
+				request := core.MakeRequest(query.Method(), query.Url(), query.Body())
 
-			return event
-		},
-	)
+				response.SetBody(request.Data())
+				response.SetTime(request.Time(true))
+				response.SetStatus(request.Status())
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(query.method)
+				}
 
-	query.body, bodyModal = queryBody()
-
-	create = Create(
-		func() {
-			request := core.MakeRequest(query.Method(), query.Url(), query.Body())
-
-			response.SetBody(request.Data())
-			response.SetTime(request.Time(true))
-			response.SetStatus(request.Status())
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(query.method)
-			}
-
-			return event
-		},
-	)
+				return event
+			},
+		).
+		Render()
 
 	layout = tview.NewFlex().
 		SetDirection(tview.FlexColumn).
@@ -77,22 +96,70 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 	return query, layout, bodyModal
 }
 
-func queryBody() (body *tview.TextArea, bodyModal *tview.Flex) {
-	body = Body()
+func initializeQueryBody(app *tview.Application) (body *tview.TextArea, modal *tview.Flex) {
+	var format *tview.Button
+	var clear *tview.Button
 
-	alignment := tview.
-		NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(nil, 0, 1, false).
-		AddItem(body, 15, 1, true).
-		AddItem(nil, 0, 1, false)
+	body = widgets.
+		NewTextArea().
+		SetPlaceholder("Enter Body").
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(format)
+				}
 
-	bodyModal = tview.
-		NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(nil, 0, 1, false).
-		AddItem(alignment, 60, 1, true).
-		AddItem(nil, 0, 1, false)
+				return event
+			},
+		).
+		Render()
 
-	return body, bodyModal
+	format = widgets.
+		NewButton().
+		SetLabel("Format").
+		HandleSelect(
+			func() {
+				body.SetText(utils.Prettier([]byte(body.GetText())), true)
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTab {
+					app.SetFocus(clear)
+				}
+
+				return event
+			},
+		).
+		Render()
+
+	clear = widgets.
+		NewButton().
+		SetLabel("Clear").
+		HandleSelect(
+			func() {
+				body.SetText("", true)
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTab {
+					app.SetFocus(body)
+				}
+
+				return event
+			},
+		).
+		Render()
+
+	modal = widgets.
+		NewModal().
+		SetTitle("  Body Data").
+		SetDimension(50, 25).
+		AddInput(body, true).
+		AddButton(format, false).
+		AddButton(clear, false).
+		Render()
+
+	return body, modal
 }

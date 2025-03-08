@@ -8,262 +8,258 @@ import (
 	"blazeapi/core"
 	"blazeapi/query"
 	"blazeapi/response"
+	"blazeapi/widgets"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 func InitializeProject(app *tview.Application, query query.Query, response response.Response) (project *tview.TreeView, createNodeModal *tview.Flex, deleteNodeModal *tview.Flex) {
-	node := CreateNode(nil, "Test", "./test", true)
+	root := NewNode().
+		Initialize(nil, "Test", "./test", true).
+		Render()
 
-	root := tview.
-		NewTreeNode(node.Name(true, false)).
-		SetReference(node)
-
-	createDirectory(root, "./test")
-
-	project = tview.
-		NewTreeView().
+	project = NewProject().
 		SetRoot(root).
-		SetCurrentNode(root).
-		SetGraphicsColor(tcell.NewRGBColor(75, 75, 75))
+		SetTitle("  Manager ").
+		HandleSelect(
+			func(treeNode *tview.TreeNode) {
+				node, ok := treeNode.GetReference().(*Node)
+
+				if !ok {
+					return
+				}
+
+				if !node.Collection() {
+					api := CreateAPI(node.path)
+
+					query.SetMethod(api.Method)
+					query.SetUrl(api.Url)
+
+					return
+				}
+
+				if treeNode.IsExpanded() {
+					treeNode.Collapse().ClearChildren().SetExpanded(false)
+					return
+				}
+
+				addDirectory(treeNode, node.path)
+
+				treeNode.SetExpanded(true)
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyCtrlA {
+					collapseDirectory(project.GetRoot())
+				}
+
+				return event
+			},
+		).
+		Render()
 
 	createNodeModal = initializeCreateNodeModal(app, project)
-	deleteNodeModal = initializeDeleteNodeModal(project)
+	deleteNodeModal = initializeDeleteNodeModal(app, project)
 
-	project.SetSelectedFunc(func(treeNode *tview.TreeNode) {
-		node, ok := treeNode.GetReference().(Node)
-
-		if !ok {
-			return
-		}
-
-		if !node.IsCollection() {
-			api := CreateAPI(node.path)
-
-			query.SetMethod(api.Method)
-			query.SetUrl(api.Url)
-
-			return
-		}
-
-		if treeNode.IsExpanded() {
-			treeNode.SetExpanded(false).ClearChildren()
-			return
-		}
-
-		createDirectory(treeNode, node.path)
-
-		treeNode.SetExpanded(true)
-	})
-
-	project.
-		SetBorder(true).
-		SetTitle("  Manager ").
-		SetBorderPadding(1, 0, 1, 0).
-		SetTitleAlign(tview.AlignLeft)
+	addDirectory(root, "./test")
 
 	return project, createNodeModal, deleteNodeModal
 }
 
 func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) (createNodeModal *tview.Flex) {
 	var input *tview.InputField
-	var createAPI *tview.Button
-	var createFolder *tview.Button
+	var request *tview.Button
+	var folder *tview.Button
 
-	input = Input(
-		"Enter Name",
-		func(textToCheck string, lastChar rune) bool {
-			if !ValidateName(textToCheck) {
-				input.SetFieldTextColor(tcell.ColorRed)
-				return false
-			}
+	input = widgets.
+		NewInput().
+		SetPlaceholder("Enter Name").
+		HandleAcceptance(
+			func(text string, lastChar rune) bool {
+				if !ValidateName(text) {
+					input.SetFieldTextColor(tcell.ColorRed)
+					return false
+				}
 
-			input.SetFieldTextColor(tcell.ColorWhite)
+				input.SetFieldTextColor(tcell.ColorWhite)
 
-			return true
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(createAPI)
-			}
+				return true
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(request)
+				}
 
-			return event
-		},
-	)
+				return event
+			},
+		).
+		Render()
 
-	createAPI = Button(
-		"Add Request",
-		func() {
-			if strings.HasSuffix(input.GetText(), "_") {
-				input.SetFieldTextColor(tcell.ColorRed)
-				return
-			}
+	request = widgets.
+		NewButton().
+		SetLabel("Add Folder").
+		HandleSelect(
+			func() {
+				if strings.HasSuffix(input.GetText(), "_") {
+					input.SetFieldTextColor(tcell.ColorRed)
+					return
+				}
 
-			treeNode := project.GetCurrentNode()
+				treeNode := project.GetCurrentNode()
 
-			if treeNode == nil {
-				return
-			}
+				if treeNode == nil {
+					return
+				}
 
-			node, ok := treeNode.GetReference().(Node)
+				node, ok := treeNode.GetReference().(*Node)
 
-			if !ok {
-				return
-			}
+				if !ok {
+					return
+				}
 
-			message, success := core.AddAPI(input.GetText(), node.Path(true))
+				message, success := core.AddAPI(input.GetText(), node.Path(true))
 
-			if success {
-				input.SetText(message)
-			}
+				if success {
+					input.SetText(message)
+				}
 
-			if node.IsCollection() {
-				expandDirectory(treeNode)
-				return
-			}
+				if node.Collection() {
+					expandDirectory(treeNode)
+					return
+				}
 
-			expandDirectory(node.parent)
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(createFolder)
-			}
+				expandDirectory(node.parent)
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(folder)
+				}
 
-			return event
-		},
-	)
+				return event
+			},
+		).
+		Render()
 
-	createFolder = Button(
-		"Add Folder",
-		func() {
-			if strings.HasSuffix(input.GetText(), "_") {
-				input.SetFieldTextColor(tcell.ColorRed)
-				return
-			}
+	folder = widgets.NewButton().
+		SetLabel("Add Folder").
+		HandleSelect(
+			func() {
+				if strings.HasSuffix(input.GetText(), "_") {
+					input.SetFieldTextColor(tcell.ColorRed)
+					return
+				}
 
-			treeNode := project.GetCurrentNode()
+				treeNode := project.GetCurrentNode()
 
-			if treeNode == nil {
-				return
-			}
+				if treeNode == nil {
+					return
+				}
 
-			node, ok := treeNode.GetReference().(Node)
+				node, ok := treeNode.GetReference().(*Node)
 
-			if !ok {
-				return
-			}
+				if !ok {
+					return
+				}
 
-			message, success := core.AddCollection(input.GetText(), node.Path(true))
+				message, success := core.AddCollection(input.GetText(), node.Path(true))
 
-			if success {
-				input.SetText(message)
-			}
+				if success {
+					input.SetText(message)
+				}
 
-			if node.IsCollection() {
-				expandDirectory(treeNode)
-				return
-			}
+				if node.Collection() {
+					expandDirectory(treeNode)
+					return
+				}
 
-			expandDirectory(node.parent)
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(input)
-			}
+				expandDirectory(node.parent)
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(input)
+				}
 
-			return event
-		},
-	)
+				return event
+			},
+		).
+		Render()
 
-	layout := tview.
-		NewGrid().
-		AddItem(input, 0, 0, 1, 2, 0, 0, true).
-		AddItem(createAPI, 1, 0, 1, 1, 0, 0, false).
-		AddItem(createFolder, 1, 1, 1, 1, 0, 0, false)
-
-	layout.
-		SetBorder(true).
-		SetTitle("  Create Artifact ").
-		SetTitleAlign(tview.AlignLeft).
-		SetBorderPadding(0, 0, 1, 1)
-
-	alignment := tview.
-		NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(nil, 0, 1, false).
-		AddItem(layout, 8, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	createNodeModal = tview.
-		NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(nil, 0, 1, false).
-		AddItem(alignment, 50, 1, true).
-		AddItem(nil, 0, 1, false)
+	createNodeModal = widgets.
+		NewModal().
+		SetTitle("Add Artifact").
+		SetDimension(50, 10).
+		AddInput(input, true).
+		AddButton(request, false).
+		AddButton(folder, false).
+		Render()
 
 	return createNodeModal
 }
 
-func initializeDeleteNodeModal(project *tview.TreeView) (createNodeModal *tview.Flex) {
-	var text *tview.TextView
+func initializeDeleteNodeModal(app *tview.Application, project *tview.TreeView) (deleteNodeModal *tview.Flex) {
+	var message *tview.TextView
 	var delete *tview.Button
 
-	text = Display("Are you sure want to delete?")
+	message = widgets.
+		NewMessage().
+		SetLabel("Are you sure want to delete?").
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				app.SetFocus(delete)
+				return event
+			},
+		).
+		Render()
 
-	delete = Button(
-		"Delete",
-		func() {
-			node, ok := project.GetCurrentNode().GetReference().(Node)
+	delete = widgets.
+		NewButton().
+		SetLabel("Delete").
+		HandleSelect(
+			func() {
+				node, ok := project.GetCurrentNode().GetReference().(Node)
 
-			if !ok {
-				return
-			}
+				if !ok {
+					return
+				}
 
-			if node.IsCollection() {
-				core.DeleteCollection(node.path)
-			}
+				if node.Collection() {
+					core.DeleteCollection(node.path)
+				}
 
-			if !node.IsCollection() {
-				core.DeleteAPI(node.path)
-			}
+				if !node.Collection() {
+					core.DeleteAPI(node.path)
+				}
 
-			expandDirectory(node.parent)
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			return event
-		},
-	)
+				expandDirectory(node.parent)
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				return event
+			},
+		).
+		Render()
 
-	layout := tview.NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(text, 0, 1, false).
-		AddItem(delete, 0, 1, true)
+	deleteNodeModal = widgets.
+		NewModal().
+		SetTitle("Add Artifact").
+		AddInput(message, false).
+		AddButton(delete, true).
+		SetDimension(50, 10).
+		Render()
 
-	layout.
-		SetBorder(true).
-		SetTitle("  Create Artifact ").
-		SetTitleAlign(tview.AlignLeft).
-		SetBorderPadding(0, 0, 1, 1)
-
-	alignment := tview.
-		NewFlex().
-		SetDirection(tview.FlexRow).
-		AddItem(nil, 0, 1, false).
-		AddItem(layout, 8, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	createNodeModal = tview.
-		NewFlex().
-		SetDirection(tview.FlexColumn).
-		AddItem(nil, 0, 1, false).
-		AddItem(alignment, 50, 1, true).
-		AddItem(nil, 0, 1, false)
-
-	return createNodeModal
+	return deleteNodeModal
 }
 
-func createDirectory(parent *tview.TreeNode, path string) {
+func addDirectory(parent *tview.TreeNode, path string) {
 	entries, err := os.ReadDir(path)
 
 	if err != nil {
@@ -272,16 +268,12 @@ func createDirectory(parent *tview.TreeNode, path string) {
 
 	for _, entry := range entries {
 		name := entry.Name()
-		path := filepath.Join(path, name)
 
-		node := CreateNode(parent, name, path, entry.IsDir())
+		node := NewNode().
+			Initialize(parent, name, filepath.Join(path, name), entry.IsDir()).
+			Render()
 
-		child := tview.
-			NewTreeNode(node.Name(true, false)).
-			SetExpanded(false).
-			SetReference(node)
-
-		parent.AddChild(child)
+		parent.AddChild(node)
 	}
 }
 
@@ -290,20 +282,21 @@ func expandDirectory(treeNode *tview.TreeNode) {
 		return
 	}
 
-	node, ok := treeNode.GetReference().(Node)
+	node, ok := treeNode.GetReference().(*Node)
 
 	if !ok {
 		return
 	}
 
-	if node.IsCollection() {
+	if node.Collection() {
 		treeNode.Collapse().ClearChildren().Expand()
-		createDirectory(treeNode, node.path)
+		addDirectory(treeNode, node.path)
 		return
 	}
 
 	node.parent.Collapse().ClearChildren().Expand()
-	createDirectory(node.parent, node.ParentNode().path)
+
+	addDirectory(node.parent, node.ParentNode().path)
 }
 
 func collapseDirectory(treeNode *tview.TreeNode) {
@@ -311,13 +304,13 @@ func collapseDirectory(treeNode *tview.TreeNode) {
 		return
 	}
 
-	node, ok := treeNode.GetReference().(Node)
+	node, ok := treeNode.GetReference().(*Node)
 
 	if !ok {
 		return
 	}
 
-	if node.IsCollection() {
+	if node.Collection() {
 		treeNode.Collapse().ClearChildren()
 		return
 	}
