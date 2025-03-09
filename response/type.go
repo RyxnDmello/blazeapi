@@ -3,6 +3,8 @@ package response
 import (
 	"fmt"
 
+	"blazeapi/utils"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -14,20 +16,38 @@ type Response struct {
 	status *tview.TextView
 }
 
+func NewResponse() *Response {
+	return &Response{
+		body:   nil,
+		code:   nil,
+		time:   nil,
+		status: nil,
+	}
+}
+
+func (query *Response) Initialize(body *tview.TextView, code *tview.TextView, time *tview.TextView, status *tview.TextView) *Response {
+	query.body = body
+	query.code = code
+	query.time = time
+	query.status = status
+	return query
+}
+
 func (response *Response) SetBody(body string) {
 	response.body.SetText(body)
 }
 
 func (response *Response) SetCode(code int) {
-	response.code.SetText(fmt.Sprintf("%d", code))
+	color := tcell.ColorWhite
 
 	if code < 300 {
-		response.code.SetBorderColor(tcell.ColorWhite)
-		return
+		color = tcell.ColorRed
 	}
 
-	response.code.SetTextColor(tcell.ColorRed)
-	response.code.SetBorderColor(tcell.ColorRed)
+	response.code.
+		SetText(fmt.Sprintf("%d", code)).
+		SetTextColor(color).
+		SetBorderColor(color)
 }
 
 func (response *Response) SetTime(time string) {
@@ -39,7 +59,23 @@ func (response *Response) SetStatus(status string) {
 }
 
 func (response *Response) Clear() {
-	response.body.Clear()
-	response.time.Clear().SetText("Time")
-	response.status.Clear().SetText("Status")
+	response.body.
+		SetText(utils.INTRODUCTION).
+		SetTextColor(tcell.ColorWhite).
+		SetBorderColor(tcell.ColorWhite)
+
+	response.code.
+		SetText("Code").
+		SetTextColor(tcell.ColorWhite).
+		SetBorderColor(tcell.ColorWhite)
+
+	response.time.
+		SetText("Time").
+		SetTextColor(tcell.ColorWhite).
+		SetBorderColor(tcell.ColorWhite)
+
+	response.status.
+		SetText("Status").
+		SetTextColor(tcell.ColorWhite).
+		SetBorderColor(tcell.ColorWhite)
 }

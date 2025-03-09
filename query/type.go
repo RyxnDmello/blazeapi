@@ -6,38 +6,53 @@ import (
 	"github.com/rivo/tview"
 )
 
-var methods []string = []string{"GET", "POST", "PATCH", "PUT", "DELETE"}
-
 type Query struct {
 	method *tview.DropDown
 	url    *tview.InputField
 	body   *tview.TextArea
 }
 
-func (query *Query) Method() string {
-	_, method := query.method.GetCurrentOption()
+func NewQuery() *Query {
+	return &Query{
+		method: nil,
+		url:    nil,
+		body:   nil,
+	}
+}
+
+func (query *Query) Initialize(method *tview.DropDown, url *tview.InputField, body *tview.TextArea) *Query {
+	query.method = method
+	query.url = url
+	query.body = body
+	return query
+}
+
+func (query *Query) Method() (method string) {
+	_, method = query.method.GetCurrentOption()
 	return method
 }
 
-func (query *Query) Url() string {
-	return query.url.GetText()
-}
-
-func (query *Query) Body() string {
-	return query.body.GetText()
-}
-
 func (query *Query) SetMethod(method string) {
-	if index := slices.Index(methods, method); index != -1 {
-		query.method.SetCurrentOption(index)
+	index := slices.Index(METHODS, method)
+
+	if index == -1 {
+		query.method.SetCurrentOption(0)
 		return
 	}
 
-	query.method.SetCurrentOption(0)
+	query.method.SetCurrentOption(index)
+}
+
+func (query *Query) Url() (url string) {
+	return query.url.GetText()
 }
 
 func (query *Query) SetUrl(url string) {
 	query.url.SetText(url)
+}
+
+func (query *Query) Body() (body string) {
+	return query.body.GetText()
 }
 
 func (query *Query) SetBody(body string) {

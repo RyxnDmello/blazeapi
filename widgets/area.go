@@ -6,6 +6,7 @@ import (
 )
 
 type textArea struct {
+	text        string
 	label       string
 	placeholder string
 	rows        int
@@ -16,6 +17,7 @@ type textArea struct {
 
 func NewTextArea() *textArea {
 	return &textArea{
+		text:        "",
 		label:       "",
 		placeholder: "",
 		rows:        0,
@@ -23,6 +25,11 @@ func NewTextArea() *textArea {
 		wordWrap:    true,
 		handleInput: nil,
 	}
+}
+
+func (textArea *textArea) SetText(text string) *textArea {
+	textArea.text = text
+	return textArea
 }
 
 func (textArea *textArea) SetLabel(label string) *textArea {
@@ -59,6 +66,7 @@ func (textArea *textArea) Render() *tview.TextArea {
 	area := tview.
 		NewTextArea().
 		SetLabel(textArea.label).
+		SetText(textArea.text, true).
 		SetWordWrap(textArea.wordWrap).
 		SetPlaceholder(textArea.placeholder).
 		SetSize(textArea.rows, textArea.columns).

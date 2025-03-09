@@ -6,19 +6,26 @@ import (
 )
 
 type message struct {
-	label       string
+	text        string
+	alignment   int
 	handleInput func(event *tcell.EventKey) *tcell.EventKey
 }
 
 func NewMessage() *message {
 	return &message{
-		label:       "",
+		text:        "",
+		alignment:   tview.AlignLeft,
 		handleInput: nil,
 	}
 }
 
-func (message *message) SetLabel(label string) *message {
-	message.label = label
+func (message *message) SetText(text string) *message {
+	message.text = text
+	return message
+}
+
+func (message *message) SetAlignment(alignment int) *message {
+	message.alignment = alignment
 	return message
 }
 
@@ -34,8 +41,8 @@ func (message *message) Render() *tview.TextView {
 		SetWordWrap(true).
 		ScrollToBeginning().
 		SetDynamicColors(true).
-		SetText(message.label).
-		SetTextAlign(tview.AlignLeft).
+		SetText(message.text).
+		SetTextAlign(message.alignment).
 		SetTextStyle(
 			tcell.StyleDefault.
 				Background(tcell.ColorBlack).
@@ -44,7 +51,8 @@ func (message *message) Render() *tview.TextView {
 
 	element.
 		SetBorder(true).
-		SetBorderPadding(0, 0, 1, 1)
+		SetBorderPadding(0, 0, 1, 1).
+		SetInputCapture(message.handleInput)
 
 	return element
 }

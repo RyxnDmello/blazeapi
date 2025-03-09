@@ -5,12 +5,21 @@ import (
 	"os"
 )
 
-type API struct {
+type Api struct {
 	Method string `json:"method"`
 	Url    string `json:"url"`
+	Body   string `json:"body"`
 }
 
-func CreateAPI(path string) (api API) {
+func NewApi() *Api {
+	return &Api{
+		Method: "",
+		Url:    "",
+		Body:   "",
+	}
+}
+
+func (api *Api) Create(path string) *Api {
 	file, err := os.ReadFile(path)
 
 	if err != nil {
@@ -20,12 +29,4 @@ func CreateAPI(path string) (api API) {
 	json.Unmarshal(file, &api)
 
 	return api
-}
-
-func (api *API) GetUrl() string {
-	return api.Url
-}
-
-func (api *API) GetMethod() string {
-	return api.Method
 }

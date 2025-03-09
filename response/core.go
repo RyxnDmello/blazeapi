@@ -1,41 +1,75 @@
 package response
 
 import (
+	"blazeapi/utils"
+	"blazeapi/widgets"
+
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func InitializeResponse(app *tview.Application) (response Response, layout *tview.Flex) {
+func InitializeResponse(app *tview.Application) (response *Response, layout *tview.Flex) {
 	var clear *tview.Button
 
-	response.body = Body(
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(clear)
-			}
+	body := widgets.
+		NewMessage().
+		SetText(utils.INTRODUCTION).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(clear)
+				}
 
-			return event
-		},
-	)
+				return event
+			},
+		).
+		Render()
 
-	response.code = Element("Code")
-	response.time = Element("Time")
-	response.status = Element("Status")
+	body.
+		SetTitle("  Response ").
+		SetBorderPadding(0, 0, 0, 0).
+		SetTitleAlign(tview.AlignLeft)
 
-	clear = Clear(
-		func() {
-			response.Clear()
-		},
-		func(event *tcell.EventKey) *tcell.EventKey {
-			if event.Key() == tcell.KeyTAB {
-				app.SetFocus(response.body)
-			}
+	code := widgets.
+		NewMessage().
+		SetText("Code").
+		SetAlignment(tview.AlignCenter).
+		Render()
 
-			return event
-		},
-	)
+	time := widgets.
+		NewMessage().
+		SetText("Time").
+		SetAlignment(tview.AlignCenter).
+		Render()
 
-	analysis := tview.
+	status := widgets.
+		NewMessage().
+		SetText("Status").
+		SetAlignment(tview.AlignCenter).
+		Render()
+
+	clear = widgets.
+		NewButton().
+		SetLabel("Clear").
+		HandleSelect(
+			func() {
+				response.Clear()
+			},
+		).
+		HandleInput(
+			func(event *tcell.EventKey) *tcell.EventKey {
+				if event.Key() == tcell.KeyTAB {
+					app.SetFocus(body)
+				}
+
+				return event
+			},
+		).
+		Render()
+
+	response = NewResponse().Initialize(body, code, time, status)
+
+	panel := tview.
 		NewFlex().
 		SetDirection(tview.FlexColumn).
 		AddItem(response.time, 0, 1, false).
@@ -46,7 +80,7 @@ func InitializeResponse(app *tview.Application) (response Response, layout *tvie
 		NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(response.body, 0, 1, true).
-		AddItem(analysis, 3, 1, true)
+		AddItem(panel, 3, 1, true)
 
 	return response, layout
 }

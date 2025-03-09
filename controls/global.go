@@ -42,8 +42,8 @@ func IsOpen(name string, pages *tview.Pages) (open bool) {
 }
 
 func Escape(app *tview.Application, pages *tview.Pages) {
-	if IsOpen("BODY_MODAL", pages) {
-		CloseModal("BODY_MODAL", pages)
+	if IsOpen("QUERY_BODY_MODAL", pages) {
+		CloseModal("QUERY_BODY_MODAL", pages)
 		return
 	}
 

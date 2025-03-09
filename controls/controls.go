@@ -11,13 +11,13 @@ import (
 func Controls(
 	app *tview.Application,
 	pages *tview.Pages,
-	query query.Query,
+	query *query.Query,
 	queryLayout *tview.Flex,
-	bodyModal *tview.Flex,
+	queryBodyModal *tview.Flex,
 	project *tview.TreeView,
 	createNodeModal *tview.Flex,
 	deleteNodeModal *tview.Flex,
-	response response.Response,
+	response *response.Response,
 	responseLayout *tview.Flex,
 ) {
 
@@ -29,12 +29,12 @@ func Controls(
 
 		case tcell.KeyCtrlB:
 			if queryLayout.HasFocus() {
-				OpenModal("BODY_MODAL", pages)
+				OpenModal("QUERY_BODY_MODAL", pages)
 				break
 			}
 
-			if IsOpen("BODY_MODAL", pages) {
-				CloseModal("BODY_MODAL", pages)
+			if IsOpen("QUERY_BODY_MODAL", pages) {
+				CloseModal("QUERY_BODY_MODAL", pages)
 				app.SetFocus(queryLayout)
 			}
 

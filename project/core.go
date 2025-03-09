@@ -14,14 +14,14 @@ import (
 	"github.com/rivo/tview"
 )
 
-func InitializeProject(app *tview.Application, query query.Query, response response.Response) (project *tview.TreeView, createNodeModal *tview.Flex, deleteNodeModal *tview.Flex) {
+func InitializeProject(app *tview.Application, query *query.Query, response *response.Response) (project *tview.TreeView, createNodeModal *tview.Flex, deleteNodeModal *tview.Flex) {
 	root := NewNode().
 		Initialize(nil, "Test", "./test", true).
 		Render()
 
-	project = NewProject().
+	project = widgets.NewTree().
 		SetRoot(root).
-		SetTitle("  Manager ").
+		SetTitle(" Manager").
 		HandleSelect(
 			func(treeNode *tview.TreeNode) {
 				node, ok := treeNode.GetReference().(*Node)
@@ -31,10 +31,11 @@ func InitializeProject(app *tview.Application, query query.Query, response respo
 				}
 
 				if !node.Collection() {
-					api := CreateAPI(node.path)
+					api := NewApi().Create(node.path)
 
 					query.SetMethod(api.Method)
 					query.SetUrl(api.Url)
+					query.SetBody(api.Body)
 
 					return
 				}
@@ -101,7 +102,7 @@ func initializeCreateNodeModal(app *tview.Application, project *tview.TreeView) 
 
 	request = widgets.
 		NewButton().
-		SetLabel("Add Folder").
+		SetLabel("Add Request").
 		HandleSelect(
 			func() {
 				if strings.HasSuffix(input.GetText(), "_") {
@@ -210,7 +211,7 @@ func initializeDeleteNodeModal(app *tview.Application, project *tview.TreeView) 
 
 	message = widgets.
 		NewMessage().
-		SetLabel("Are you sure want to delete?").
+		SetText("Are you sure want to delete?").
 		HandleInput(
 			func(event *tcell.EventKey) *tcell.EventKey {
 				app.SetFocus(delete)
@@ -251,7 +252,7 @@ func initializeDeleteNodeModal(app *tview.Application, project *tview.TreeView) 
 	deleteNodeModal = widgets.
 		NewModal().
 		SetTitle("Add Artifact").
-		AddInput(message, false).
+		AddInput(message, true).
 		AddButton(delete, true).
 		SetDimension(50, 10).
 		Render()

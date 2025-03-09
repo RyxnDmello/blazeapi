@@ -14,10 +14,10 @@ import (
 
 var METHODS []string = []string{"GET", "POST", "PATCH", "PUT", "DELETE"}
 
-func InitializeQuery(app *tview.Application, response response.Response) (query Query, layout *tview.Flex, bodyModal *tview.Flex) {
+func InitializeQuery(app *tview.Application, response *response.Response) (query *Query, layout *tview.Flex, queryBodyModal *tview.Flex) {
 	var create *tview.Button
 
-	query.method = widgets.
+	method := widgets.
 		NewDropdown().
 		SetOptions(METHODS).
 		HandleInput(
@@ -31,7 +31,7 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 		).
 		Render()
 
-	query.url = widgets.
+	url := widgets.
 		NewInput().
 		SetPlaceholder("Enter Query").
 		HandleAcceptance(
@@ -62,8 +62,6 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 		).
 		Render()
 
-	query.body, bodyModal = initializeQueryBody(app)
-
 	create = widgets.
 		NewButton().
 		SetLabel("Create").
@@ -87,16 +85,20 @@ func InitializeQuery(app *tview.Application, response response.Response) (query 
 		).
 		Render()
 
+	body, queryBodyModal := initializeQueryBodyModal(app)
+
+	query = NewQuery().Initialize(method, url, body)
+
 	layout = tview.NewFlex().
 		SetDirection(tview.FlexColumn).
 		AddItem(query.method, 0, 1, false).
 		AddItem(query.url, 0, 5, true).
 		AddItem(create, 0, 1, false)
 
-	return query, layout, bodyModal
+	return query, layout, queryBodyModal
 }
 
-func initializeQueryBody(app *tview.Application) (body *tview.TextArea, modal *tview.Flex) {
+func initializeQueryBodyModal(app *tview.Application) (body *tview.TextArea, modal *tview.Flex) {
 	var format *tview.Button
 	var clear *tview.Button
 
@@ -154,7 +156,7 @@ func initializeQueryBody(app *tview.Application) (body *tview.TextArea, modal *t
 
 	modal = widgets.
 		NewModal().
-		SetTitle("  Body Data").
+		SetTitle(" Body Data").
 		SetDimension(50, 25).
 		AddInput(body, true).
 		AddButton(format, false).
