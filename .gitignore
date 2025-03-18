@@ -6,18 +6,21 @@ go.work.sum
 .env
 
 # Binaries
+bin/
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+*.out
+*.o
 
 # Test/Coverage
-test
-*.out
+test/
+coverage.out
 
-# Dependency Directories
+# Dependency
 vendor/
 
 # VS Code
-.vscode
+.vscode/

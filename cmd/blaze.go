@@ -10,22 +10,21 @@ import (
 )
 
 var (
-	query          *QUERY.Query
-	queryLayout    *tview.Flex
-	queryBodyModal *tview.Flex
-
-	project         *tview.TreeView
-	createNodeModal *tview.Flex
-	deleteNodeModal *tview.Flex
-
-	response       *RESPONSE.Response
-	responseLayout *tview.Flex
+	query             *QUERY.Query
+	queryLayout       *tview.Flex
+	queryBodyModal    *tview.Flex
+	project           *tview.TreeView
+	createFileModal   *tview.Flex
+	createFolderModal *tview.Flex
+	deleteNodeModal   *tview.Flex
+	response          *RESPONSE.Response
+	responseLayout    *tview.Flex
 )
 
 func Blaze(app *tview.Application) *tview.Pages {
 	response, responseLayout = RESPONSE.InitializeResponse(app)
 	query, queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
-	project, createNodeModal, deleteNodeModal = PROJECT.InitializeProject(app, query, response)
+	project, createFileModal, createFolderModal, deleteNodeModal = PROJECT.InitializeProject(app, query, response)
 
 	layout := tview.
 		NewFlex().
@@ -42,7 +41,8 @@ func Blaze(app *tview.Application) *tview.Pages {
 		NewPages().
 		AddPage("QUERY_BODY_MODAL", queryBodyModal, true, false).
 		AddPage("DELETE_NODE_MODAL", deleteNodeModal, true, false).
-		AddPage("CREATE_NODE_MODAL", createNodeModal, true, false).
+		AddPage("CREATE_FOLDER_MODAL", createFolderModal, true, false).
+		AddPage("CREATE_FILE_MODAL", createFileModal, true, false).
 		AddPage("MAIN", main, true, true)
 
 	CONTROLS.Controls(
@@ -52,7 +52,8 @@ func Blaze(app *tview.Application) *tview.Pages {
 		queryLayout,
 		queryBodyModal,
 		project,
-		createNodeModal,
+		createFileModal,
+		createFolderModal,
 		deleteNodeModal,
 		response,
 		responseLayout,

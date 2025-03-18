@@ -10,23 +10,35 @@ import (
 	"blazeapi/utils"
 )
 
-type Response struct {
+type Request struct {
 	data   string
+	status string
 	code   int
 	time   int64
-	status string
-	err    bool
 }
 
-func (response *Response) Data() string {
+func NewRequest() *Request {
+	return &Request{
+		data:   "",
+		status: "",
+		code:   404,
+		time:   0,
+	}
+}
+
+func (response *Request) Data() string {
 	return response.data
 }
 
-func (response *Response) Code() int {
+func (response *Request) Status() string {
+	return response.status
+}
+
+func (response *Request) Code() int {
 	return response.code
 }
 
-func (response *Response) Time(milliseconds bool) string {
+func (response *Request) Time(milliseconds bool) string {
 	if milliseconds {
 		return fmt.Sprintf("%d", response.time)
 	}
@@ -34,46 +46,36 @@ func (response *Response) Time(milliseconds bool) string {
 	return fmt.Sprintf("%d", response.time*1000)
 }
 
-func (response *Response) Status() string {
-	return response.status
-}
-
-func (response *Response) IsError() bool {
-	return response.err
-}
-
-func MakeRequest(method string, url string, body string) (response Response) {
+func (request *Request) MakeRequest(method string, url string, body string) (response *Request) {
 	duration := time.Now()
 
-	request, err := http.NewRequest(method, url, bytes.NewBufferString(body))
+	req, err := http.NewRequest(method, url, bytes.NewBufferString(body))
 
 	if err != nil {
-		return Response{
+		return &Request{
 			data:   "Invalid Request",
 			status: "Invalid Request",
 			code:   404,
 			time:   0,
-			err:    true,
 		}
 	}
 
-	request.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 
-	return handleRequest(request, duration)
+	return handleRequest(req, duration)
 }
 
-func handleRequest(request *http.Request, duration time.Time) (response Response) {
-	res, err := http.DefaultClient.Do(request)
+func handleRequest(req *http.Request, duration time.Time) (response *Request) {
+	res, err := http.DefaultClient.Do(req)
 
 	if err != nil {
 		elapsed := time.Since(duration).Milliseconds()
 
-		return Response{
+		return &Request{
 			data:   "Invalid Request",
 			status: "Invalid Request",
 			code:   404,
 			time:   elapsed,
-			err:    true,
 		}
 	}
 
@@ -84,12 +86,11 @@ func handleRequest(request *http.Request, duration time.Time) (response Response
 	if err != nil {
 		elapsed := time.Since(duration).Milliseconds()
 
-		return Response{
+		return &Request{
 			data:   "Invalid Request",
 			status: "Invalid Request",
 			code:   404,
 			time:   elapsed,
-			err:    true,
 		}
 	}
 
@@ -97,11 +98,10 @@ func handleRequest(request *http.Request, duration time.Time) (response Response
 
 	elapsed := time.Since(duration).Milliseconds()
 
-	return Response{
+	return &Request{
 		data:   output,
 		status: res.Status,
 		code:   res.StatusCode,
 		time:   elapsed,
-		err:    false,
 	}
 }
