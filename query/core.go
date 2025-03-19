@@ -67,7 +67,7 @@ func InitializeQuery(app *tview.Application, response *response.Response) (query
 		SetLabel("Create").
 		HandleSelect(
 			func() {
-				request := core.MakeRequest(query.Method(), query.Url(), query.Body())
+				request := core.NewRequest().MakeRequest(query.Method(), query.Url(), query.Body())
 
 				response.SetBody(request.Data())
 				response.SetTime(request.Time(true))

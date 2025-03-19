@@ -8,6 +8,13 @@ import (
 	"github.com/rivo/tview"
 )
 
+var modals []string = []string{
+	"CREATE_FOLDER_MODAL",
+	"CREATE_FILE_MODAL",
+	"DELETE_NODE_MODAL",
+	"QUERY_BODY_MODAL",
+}
+
 func Controls(
 	app *tview.Application,
 	pages *tview.Pages,
@@ -15,7 +22,8 @@ func Controls(
 	queryLayout *tview.Flex,
 	queryBodyModal *tview.Flex,
 	project *tview.TreeView,
-	createNodeModal *tview.Flex,
+	createFileModal *tview.Flex,
+	createFolderModal *tview.Flex,
 	deleteNodeModal *tview.Flex,
 	response *response.Response,
 	responseLayout *tview.Flex,
@@ -42,14 +50,25 @@ func Controls(
 			CloseEveryModal(pages)
 			app.SetFocus(project)
 
-		case tcell.KeyCtrlN:
+		case tcell.KeyCtrlA:
 			if project.HasFocus() {
-				OpenModal("CREATE_NODE_MODAL", pages)
+				OpenModal("CREATE_FILE_MODAL", pages)
 				break
 			}
 
-			if IsOpen("CREATE_NODE_MODAL", pages) {
-				CloseModal("CREATE_NODE_MODAL", pages)
+			if IsOpen("CREATE_FILE_MODAL", pages) {
+				CloseModal("CREATE_FILE_MODAL", pages)
+				app.SetFocus(project)
+			}
+
+		case tcell.KeyCtrlF:
+			if project.HasFocus() {
+				OpenModal("CREATE_FOLDER_MODAL", pages)
+				break
+			}
+
+			if IsOpen("CREATE_FOLDER_MODAL", pages) {
+				CloseModal("CREATE_FOLDER_MODAL", pages)
 				app.SetFocus(project)
 			}
 
@@ -69,7 +88,7 @@ func Controls(
 			app.SetFocus(responseLayout)
 
 		case tcell.KeyEsc:
-			Escape(app, pages)
+			Escape(app, modals, pages)
 		}
 
 		return event

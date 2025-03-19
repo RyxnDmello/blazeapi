@@ -41,20 +41,12 @@ func IsOpen(name string, pages *tview.Pages) (open bool) {
 	return front == name
 }
 
-func Escape(app *tview.Application, pages *tview.Pages) {
-	if IsOpen("QUERY_BODY_MODAL", pages) {
-		CloseModal("QUERY_BODY_MODAL", pages)
-		return
-	}
-
-	if IsOpen("CREATE_NODE_MODAL", pages) {
-		CloseModal("CREATE_NODE_MODAL", pages)
-		return
-	}
-
-	if IsOpen("DELETE_NODE_MODAL", pages) {
-		CloseModal("DELETE_NODE_MODAL", pages)
-		return
+func Escape(app *tview.Application, modals []string, pages *tview.Pages) {
+	for _, modal := range modals {
+		if IsOpen(modal, pages) {
+			CloseModal(modal, pages)
+			return
+		}
 	}
 
 	utils.Exit(app, "Terminated Successfully")
