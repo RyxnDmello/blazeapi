@@ -14,6 +14,27 @@ type modal struct {
 	dimension Dimension
 }
 
+// NewModal creates and returns an instance of the modal type.
+//
+// The modal widget is used to create popup dialogs in Blaze. Properties such
+// as the title, inputs, buttons, and dimensions can be customized. The widget
+// aligns with the features and requirements of Blaze. Under the hood, it uses
+// tview.Flex to render the user interface.
+//
+// # Properties
+//
+//	title     string
+//	inputs    []Element
+//	buttons   []Element
+//	dimension Dimension
+//
+// # Returns
+//
+//	*modal
+//
+// # Usage
+//
+//	modal := widgets.NewModal()
 func NewModal() *modal {
 	return &modal{
 		title:   "",
@@ -26,11 +47,44 @@ func NewModal() *modal {
 	}
 }
 
+// SetTitle sets the title of the modal type.
+//
+// The title is displayed at the top of the modal dialog. Method chaining is
+// supported.
+//
+// # Parameters
+//
+//	title string
+//
+// # Returns
+//
+//	*modal
+//
+// # Usage
+//
+//	modal := widgets.NewModal().SetTitle("")
 func (modal *modal) SetTitle(title string) *modal {
 	modal.title = title
 	return modal
 }
 
+// AddInput adds an input element to the modal type.
+//
+// An input element is appended to the modal’s input list with an active state.
+// Method chaining is supported.
+//
+// # Parameters
+//
+//	input  tview.Primitive
+//	active bool
+//
+// # Returns
+//
+//	*modal
+//
+// # Usage
+//
+//	modal := widgets.NewModal().AddInput(nil, false)
 func (modal *modal) AddInput(input tview.Primitive, active bool) *modal {
 	modal.inputs = append(
 		modal.inputs,
@@ -43,6 +97,23 @@ func (modal *modal) AddInput(input tview.Primitive, active bool) *modal {
 	return modal
 }
 
+// AddButton adds a button element to the modal type.
+//
+// A button element is appended to the modal’s button list with an active state.
+// Method chaining is supported.
+//
+// # Parameters
+//
+//	button tview.Primitive
+//	active bool
+//
+// # Returns
+//
+//	*modal
+//
+// # Usage
+//
+//	modal := widgets.NewModal().AddButton(nil, false)
 func (modal *modal) AddButton(button tview.Primitive, active bool) *modal {
 	modal.buttons = append(
 		modal.buttons,
@@ -55,12 +126,47 @@ func (modal *modal) AddButton(button tview.Primitive, active bool) *modal {
 	return modal
 }
 
+// SetDimension sets the dimensions of the modal type.
+//
+// The width and height are updated to the specified values. Method chaining
+// is supported.
+//
+// # Parameters
+//
+//	width  int
+//	height int
+//
+// # Returns
+//
+//	*modal
+//
+// # Usage
+//
+//	modal := widgets.NewModal().SetDimension(0, 0)
 func (modal *modal) SetDimension(width, height int) *modal {
 	modal.dimension.width = width
 	modal.dimension.height = height
 	return modal
 }
 
+// Render creates and returns a tview.Flex with the configured properties.
+//
+// A tview.Flex is built with the set properties. This function renders the
+// modal dialog for display in Blaze.
+//
+// # Returns
+//
+//	*tview.Flex
+//
+// # Usage
+//
+//	modal := widgets.
+//	     NewModal().
+//	     SetTitle("").
+//	     AddInput(nil, false).
+//	     AddButton(nil, false).
+//	     SetDimension(0, 0).
+//	     Render()
 func (modal *modal) Render() *tview.Flex {
 	if len(modal.inputs) == 0 {
 		panic("Modal Must Contain An Input")
@@ -107,6 +213,23 @@ func (modal *modal) Render() *tview.Flex {
 	return popup
 }
 
+// flow creates and returns a tview.Flex with the specified elements and direction.
+//
+// A tview.Flex is built to arrange elements in a row or column. This function
+// is a helper for laying out modal components.
+//
+// # Parameters
+//
+//	elements  []Element
+//	direction int
+//
+// # Returns
+//
+//	*tview.Flex
+//
+// # Usage
+//
+//	flow := widgets.flow([]Element{}, tview.FlexRow)
 func flow(elements []Element, direction int) (flow *tview.Flex) {
 	flow = tview.
 		NewFlex().
