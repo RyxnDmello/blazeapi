@@ -2,7 +2,8 @@ package response
 
 import (
 	"blazeapi/utils"
-	"blazeapi/widgets"
+
+	"github.com/ryxndmello/blazelib/widgets"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
