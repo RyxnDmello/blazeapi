@@ -26,16 +26,17 @@ func Blaze(app *tview.Application) *tview.Pages {
 	query, queryLayout, queryBodyModal = QUERY.InitializeQuery(app, response)
 	project, createFileModal, createFolderModal, deleteNodeModal = PROJECT.InitializeProject(app, query, response)
 
+	primaryLayout := tview.
+		NewFlex().
+		SetDirection(tview.FlexColumn).
+		AddItem(project, 40, 1, true).
+		AddItem(responseLayout, 0, 1, true)
+
 	layout := tview.
 		NewFlex().
-		AddItem(project, 0, 1, true).
-		AddItem(responseLayout, 0, 2, true)
-
-	main := tview.
-		NewGrid().
-		SetRows(3, 0).
-		AddItem(queryLayout, 0, 0, 1, 2, 0, 0, false).
-		AddItem(layout, 1, 0, 1, 2, 0, 0, true)
+		SetDirection(tview.FlexRow).
+		AddItem(queryLayout, 1, 1, false).
+		AddItem(primaryLayout, 0, 1, true)
 
 	pages := tview.
 		NewPages().
@@ -43,7 +44,7 @@ func Blaze(app *tview.Application) *tview.Pages {
 		AddPage("DELETE_NODE_MODAL", deleteNodeModal, true, false).
 		AddPage("CREATE_FOLDER_MODAL", createFolderModal, true, false).
 		AddPage("CREATE_FILE_MODAL", createFileModal, true, false).
-		AddPage("MAIN", main, true, true)
+		AddPage("MAIN", layout, true, true)
 
 	CONTROLS.Controls(
 		app,

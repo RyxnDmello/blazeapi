@@ -1,364 +1,140 @@
 package project
 
 import (
-	"os"
-	"path/filepath"
-
 	"blazeapi/core"
 	"blazeapi/query"
 	"blazeapi/response"
-	"blazeapi/utils"
 
-	"github.com/ryxndmello/blazelib/widgets"
+	"blazeapi/widgets/modal"
+	"blazeapi/widgets/tree"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
 func InitializeProject(app *tview.Application, query *query.Query, response *response.Response) (project *tview.TreeView, createFileModal *tview.Flex, createFolderModal *tview.Flex, deleteNodeModal *tview.Flex) {
-	root := NewNode().
-		Initialize(nil, "Test", "./test", true).
-		Render()
+	design := tree.
+		NewDesign().
+		SetRootColor(0x11111b)
 
-	project = widgets.NewTree().
+	root := tree.
+		NewRoot().
+		SetPath("./test").
+		SetName("test").
+		SetPadding(40).
+		SetExpanded(true).
+		SetSelectedStyle(0x181825, 0xcdd6f4).
+		SetUnselectedStyle(0x11111b, 0xcdd6f4)
+
+	project = tree.
+		NewTree().
 		SetRoot(root).
-		SetTitle(" Manager").
-		HandleSelect(
-			func(treeNode *tview.TreeNode) {
-				node, ok := treeNode.GetReference().(*Node)
+		SetDesign(design).
+		SetHierarchy(true).
+		HandleSelect(func(node *tree.Node, treeNode *tview.TreeNode) {
+			if node.IsDir() {
+				tree.Toggle(node, treeNode)
+				return
+			}
 
-				if !ok {
-					return
-				}
+			api := core.NewApi().Read(node.GetPath())
+			query.SetMethod(api.Method)
+			query.SetBody(api.Body)
+			query.SetUrl(api.Url)
+		}).
+		HandleDimension(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
+			return x, y + 1, width, height
+		}).
+		View()
 
-				if !node.Collection() {
-					api := core.NewApi().Read(node.path)
-
-					query.SetMethod(api.Method)
-					query.SetUrl(api.Url)
-					query.SetBody(api.Body)
-
-					return
-				}
-
-				if treeNode.IsExpanded() {
-					treeNode.Collapse().ClearChildren().SetExpanded(false)
-					return
-				}
-
-				addDirectory(treeNode, node.path)
-
-				treeNode.SetExpanded(true)
-			},
-		).
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyCtrlA {
-					collapseDirectory(project.GetRoot())
-				}
-
-				return event
-			},
-		).
-		Render()
-
-	createFolderModal = initializeCreateFolderModal(app, project)
-	createFileModal = initializeCreateFileModal(app, project)
-	deleteNodeModal = initializeDeleteNodeModal(app, project)
-
-	addDirectory(root, "./test")
+	createFolderModal = messageModal(app, project)
+	createFileModal = inputModal(app, project)
+	deleteNodeModal = bodyModal(app, project)
 
 	return project, createFileModal, createFolderModal, deleteNodeModal
 }
 
-func initializeCreateFolderModal(app *tview.Application, project *tview.TreeView) (createFolderModal *tview.Flex) {
-	var input *tview.InputField
-	var button *tview.Button
+func messageModal(app *tview.Application, _ *tview.TreeView) *tview.Flex {
+	messageModal := modal.
+		NewMessageModal().
+		SetDefaultMessage("Message").
+		SetDefaultSuccessButton("Success").
+		SetDefaultFailureButton("Failure").
+		HandleDefaultSwitch(func(index int) (*tview.Application, int) {
+			if index == modal.MessageModalSuccessButton {
+				return app, modal.MessageModalFailureButton
+			}
 
-	input = widgets.
-		NewInput().
-		SetPlaceholder("Enter Name").
-		HandleAcceptance(
-			func(text string, lastChar rune) bool {
-				if !utils.ValidateIdentifier(text) {
-					input.SetFieldTextColor(tcell.ColorRed)
-					return false
-				}
+			return app, modal.MessageModalSuccessButton
+		})
 
-				input.SetFieldTextColor(tcell.ColorWhite)
+	modal := modal.
+		NewModal(messageModal).
+		SetGap(1, 0).
+		SetBackgroundColor(0x11111b).
+		View()
 
-				return true
-			},
-		).
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyTAB {
-					app.SetFocus(button)
-				}
-
-				return event
-			},
-		).
-		Render()
-
-	button = widgets.NewButton().
-		SetLabel("Create").
-		HandleSelect(
-			func() {
-				if !utils.ValidateIdentifier(input.GetText()) {
-					input.SetFieldTextColor(tcell.ColorRed)
-					return
-				}
-
-				treeNode := project.GetCurrentNode()
-
-				if treeNode == nil {
-					return
-				}
-
-				node, ok := treeNode.GetReference().(*Node)
-
-				if !ok {
-					return
-				}
-
-				_, message, success := core.NewCollection().Create(input.GetText(), node.Path(true))
-
-				input.SetText(message).SetFieldTextColor(tcell.ColorWhite)
-
-				if !success {
-					input.SetFieldTextColor(tcell.ColorRed)
-				}
-
-				if node.Collection() {
-					expandDirectory(treeNode)
-					return
-				}
-
-				expandDirectory(node.parent)
-			},
-		).
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyTAB {
-					app.SetFocus(input)
-				}
-
-				return event
-			},
-		).
-		Render()
-
-	createFolderModal = widgets.
-		NewModal().
-		SetTitle("Create Collection").
-		SetDimension(50, 10).
-		AddInput(input, true).
-		AddButton(button, false).
-		Render()
-
-	return createFolderModal
+	return modal
 }
 
-func initializeCreateFileModal(app *tview.Application, project *tview.TreeView) (createFileModal *tview.Flex) {
-	var input *tview.InputField
-	var button *tview.Button
+func inputModal(app *tview.Application, _ *tview.TreeView) *tview.Flex {
+	inputModal := modal.
+		NewInputModal().
+		SetDefaultMessage("Message").
+		SetDefaultSuccessButton("Success").
+		SetDefaultFailureButton("Failure").
+		SetDefaultInput("", "Enter A Message").
+		HandleDefaultSwitch(func(index int) (*tview.Application, int) {
+			if index == modal.InputModalSuccessButton {
+				return app, modal.InputModalFailureButton
+			}
 
-	input = widgets.
-		NewInput().
-		SetPlaceholder("Enter Name").
-		HandleAcceptance(
-			func(text string, lastChar rune) bool {
-				if !utils.ValidateIdentifier(text) {
-					input.SetFieldTextColor(tcell.ColorRed)
-					return false
-				}
+			if index == modal.InputModalFailureButton {
+				return app, modal.InputModalInput
+			}
 
-				input.SetFieldTextColor(tcell.ColorWhite)
+			if index == modal.InputModalInput {
+				return app, modal.InputModalSuccessButton
+			}
 
-				return true
-			},
-		).
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyTAB {
-					app.SetFocus(button)
-				}
+			return app, modal.InputModalSuccessButton
+		})
 
-				return event
-			},
-		).
-		Render()
+	modal := modal.
+		NewModal(inputModal).
+		SetBackgroundColor(0x11111b).
+		View()
 
-	button = widgets.NewButton().
-		SetLabel("Create").
-		HandleSelect(
-			func() {
-				if !utils.ValidateIdentifier(input.GetText()) {
-					input.SetFieldTextColor(tcell.ColorRed)
-					return
-				}
-
-				treeNode := project.GetCurrentNode()
-
-				if treeNode == nil {
-					return
-				}
-
-				node, ok := treeNode.GetReference().(*Node)
-
-				if !ok {
-					return
-				}
-
-				_, message, success := core.NewApi().Create(input.GetText(), node.Path(true))
-
-				input.SetText(message).SetFieldTextColor(tcell.ColorWhite)
-
-				if !success {
-					input.SetFieldTextColor(tcell.ColorRed)
-				}
-
-				if node.Collection() {
-					expandDirectory(treeNode)
-					return
-				}
-
-				expandDirectory(node.parent)
-			},
-		).
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				if event.Key() == tcell.KeyTAB {
-					app.SetFocus(input)
-				}
-
-				return event
-			},
-		).
-		Render()
-
-	createFileModal = widgets.
-		NewModal().
-		SetTitle("Create Request").
-		SetDimension(50, 10).
-		AddInput(input, true).
-		AddButton(button, false).
-		Render()
-
-	return createFileModal
+	return modal
 }
 
-func initializeDeleteNodeModal(app *tview.Application, project *tview.TreeView) (deleteNodeModal *tview.Flex) {
-	var message *tview.TextView
-	var delete *tview.Button
+func bodyModal(app *tview.Application, _ *tview.TreeView) *tview.Flex {
+	areaModal := modal.
+		NewAreaModal().
+		SetDefaultMessage("Message").
+		SetDefaultSuccessButton("Success").
+		SetDefaultFailureButton("Failure").
+		SetDefaultArea("", "Enter Body", 10, 0).
+		HandleDefaultSwitch(func(index int) (*tview.Application, int) {
+			if index == modal.InputModalSuccessButton {
+				return app, modal.InputModalFailureButton
+			}
 
-	message = widgets.
-		NewMessage().
-		SetText("Are you sure want to delete?").
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				app.SetFocus(delete)
-				return event
-			},
-		).
-		Render()
+			if index == modal.InputModalFailureButton {
+				return app, modal.InputModalInput
+			}
 
-	delete = widgets.
-		NewButton().
-		SetLabel("Delete").
-		HandleSelect(
-			func() {
-				node, ok := project.GetCurrentNode().GetReference().(*Node)
+			if index == modal.InputModalInput {
+				return app, modal.InputModalSuccessButton
+			}
 
-				if !ok {
-					return
-				}
+			return app, modal.InputModalSuccessButton
+		})
 
-				if node.Collection() {
-					core.NewCollection().Delete(node.path)
-				}
+	modal := modal.
+		NewModal(areaModal).
+		SetBackgroundColor(0x11111b).
+		View()
 
-				if !node.Collection() {
-					core.NewApi().Delete(node.path)
-				}
-
-				expandDirectory(node.parent)
-			},
-		).
-		HandleInput(
-			func(event *tcell.EventKey) *tcell.EventKey {
-				return event
-			},
-		).
-		Render()
-
-	deleteNodeModal = widgets.
-		NewModal().
-		SetTitle("Add Artifact").
-		AddInput(message, true).
-		AddButton(delete, true).
-		SetDimension(50, 10).
-		Render()
-
-	return deleteNodeModal
-}
-
-func addDirectory(parent *tview.TreeNode, path string) {
-	entries, err := os.ReadDir(path)
-
-	if err != nil {
-		panic("Invalid Collection")
-	}
-
-	for _, entry := range entries {
-		name := entry.Name()
-
-		node := NewNode().
-			Initialize(parent, name, filepath.Join(path, name), entry.IsDir()).
-			Render()
-
-		parent.AddChild(node)
-	}
-}
-
-func expandDirectory(treeNode *tview.TreeNode) {
-	if treeNode == nil {
-		return
-	}
-
-	node, ok := treeNode.GetReference().(*Node)
-
-	if !ok {
-		return
-	}
-
-	if node.Collection() {
-		treeNode.Collapse().ClearChildren().Expand()
-		addDirectory(treeNode, node.path)
-		return
-	}
-
-	node.parent.Collapse().ClearChildren().Expand()
-
-	addDirectory(node.parent, node.ParentNode().path)
-}
-
-func collapseDirectory(treeNode *tview.TreeNode) {
-	if treeNode == nil {
-		return
-	}
-
-	node, ok := treeNode.GetReference().(*Node)
-
-	if !ok {
-		return
-	}
-
-	if node.Collection() {
-		treeNode.Collapse().ClearChildren()
-		return
-	}
-
-	node.parent.Collapse().ClearChildren()
+	return modal
 }
