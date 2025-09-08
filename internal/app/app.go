@@ -4,6 +4,7 @@ import (
 	"github.com/rivo/tview"
 
 	"github.com/ryxndmello/flame/internal/explorer"
+	"github.com/ryxndmello/flame/internal/query"
 	"github.com/ryxndmello/flame/internal/response"
 )
 
@@ -16,6 +17,9 @@ func Run() error {
 	responseView := response.
 		NewDefaultResponse(app)
 
+	queryView := query.
+		NewDefaultQuery(app, responseView)
+
 	middleLayout := tview.
 		NewFlex().
 		SetDirection(tview.FlexColumn).
@@ -25,6 +29,7 @@ func Run() error {
 	layout := tview.
 		NewFlex().
 		SetDirection(tview.FlexRow).
+		AddItem(queryView.GetLayout(), 1, 1, true).
 		AddItem(middleLayout, 0, 1, true)
 
 	pages := tview.
