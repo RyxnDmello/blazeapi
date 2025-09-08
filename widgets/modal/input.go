@@ -1,10 +1,10 @@
 package modal
 
 import (
-	"blazeapi/widgets/button"
-	"blazeapi/widgets/glyph"
-	"blazeapi/widgets/input"
-	"blazeapi/widgets/message"
+	"github.com/ryxndmello/flame/widgets/button"
+	"github.com/ryxndmello/flame/widgets/glyph"
+	"github.com/ryxndmello/flame/widgets/input"
+	"github.com/ryxndmello/flame/widgets/message"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"

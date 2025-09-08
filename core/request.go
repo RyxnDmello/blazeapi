@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"blazeapi/utils"
+	"github.com/ryxndmello/flame/utils"
 )
 
 type Request struct {

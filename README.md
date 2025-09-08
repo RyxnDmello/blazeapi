@@ -1,14 +1,14 @@
 ![banner](https://github.com/RyxnDmello/WebApp-NodeJs-02/assets/64190011/586e9e9e-c671-44c2-962d-0375f86e34e1)
 
 <p align="center">
-  <img src="https://img.shields.io/github/languages/top/ryxndmello/blazeapi?style=for-the-badge&color=blue" />
-  <img src="https://img.shields.io/github/commit-activity/y/ryxndmello/blazeapi?style=for-the-badge&color=blue" />
-  <img src="https://img.shields.io/github/last-commit/ryxndmello/blazeapi?style=for-the-badge&color=blue" />
-  <img src="https://img.shields.io/github/repo-size/ryxndmello/blazeapi?style=for-the-badge&color=blue" />
+  <img src="https://img.shields.io/github/languages/top/ryxndmello/github.com/ryxndmello/flame?style=for-the-badge&color=blue" />
+  <img src="https://img.shields.io/github/commit-activity/y/ryxndmello/github.com/ryxndmello/flame?style=for-the-badge&color=blue" />
+  <img src="https://img.shields.io/github/last-commit/ryxndmello/github.com/ryxndmello/flame?style=for-the-badge&color=blue" />
+  <img src="https://img.shields.io/github/repo-size/ryxndmello/github.com/ryxndmello/flame?style=for-the-badge&color=blue" />
 <api/p>
 
 ## 🔥Blaze
-A Terminal User Interface (TUI) built entirely with Go and powered by [tview](https://github.com/rivo/tview). It enables developers to create, organize, and test APIs effortlessly. Users can structure APIs into collections, send HTTP requests _GET, POST, PUT, PATCH, DELETE_ and view formatted JSON responses with detailed performance metrics. With an intuitive design and core functionality, BlazeAPI brings seamless API debugging and analysis directly to your terminal.
+A Terminal User Interface (TUI) built entirely with Go and powered by [tview](https://github.com/rivo/tview). It enables developers to create, organize, and test APIs effortlessly. Users can structure APIs into collections, send HTTP requests _GET, POST, PUT, PATCH, DELETE_ and view formatted JSON responses with detailed performance metrics. With an intuitive design and core functionality, github.com/ryxndmello/flame brings seamless API debugging and analysis directly to your terminal.
 
 ## 🛠️ Features
 
@@ -37,7 +37,7 @@ Follow these steps to set up and run the project locally:
   - **Clone with HTTPS**: Use the following command to clone the repository:
   - **Fork the Repository**: Create your own copy of the repository on GitHub.
 ```bash
-git clone https://github.com/RyxnDmello/blazeapi.git
+git clone https://github.com/RyxnDmello/github.com/ryxndmello/flame.git
 ```
 
 ### Install the Environment
@@ -69,11 +69,11 @@ go mod tidy
 ```
 - Build the binary
 ```bash
-go build -o blazeapi
+go build -o github.com/ryxndmello/flame
 ```
 - Run the binary
 ```bash
-./blazeapi
+./github.com/ryxndmello/flame
 ```
 
 ---

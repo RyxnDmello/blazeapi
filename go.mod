@@ -1,10 +1,8 @@
-module blazeapi
+module github.com/ryxndmello/flame
 
 go 1.23.4
 
 require github.com/rivo/tview v0.0.0-20250330220935-949945f8d922
-
-require github.com/ryxndmello/blazelib v0.0.0-20250420192829-78ade84d3f20
 
 require github.com/tidwall/pretty v1.2.1 // direct
 

@@ -3,7 +3,7 @@ package controls
 import (
 	"strings"
 
-	"blazeapi/utils"
+	"github.com/ryxndmello/flame/utils"
 
 	"github.com/rivo/tview"
 )

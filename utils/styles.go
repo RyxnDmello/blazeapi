@@ -33,7 +33,7 @@ const INTRODUCTION = `
 	╠═══════════════════════════════╣
 	║  github/ryxndmello	    	║
 	║  github/ryxndmello/blaze   	║
-	║  github/ryxndmello/blazeapi  ║
+	║  github/ryxndmello/github.com/ryxndmello/flame  ║
 	║  github/ryxndmello/blazedocs ║
 	╚═══════════════════════════════╝
 `

@@ -1,7 +1,7 @@
 package dropdown
 
 import (
-	"blazeapi/widgets/glyph"
+	"github.com/ryxndmello/flame/widgets/glyph"
 
 	"github.com/gdamore/tcell/v2"
 )
